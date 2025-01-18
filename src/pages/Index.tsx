@@ -1,59 +1,20 @@
 import { SearchBar } from "@/components/SearchBar";
 import { FilterBar } from "@/components/FilterBar";
 import { SchoolCard } from "@/components/SchoolCard";
-
-const MOCK_SCHOOLS = [
-  {
-    id: 1,
-    name: "Premier Driving Academy",
-    rating: 4.8,
-    reviews: 128,
-    price: 65,
-    priceHidden: false,
-    location: "San Francisco, CA",
-    image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&q=80",
-    isActive: true,
-    nextAvailable: "Tomorrow, 2:00 PM",
-  },
-  {
-    id: 2,
-    name: "Safe Roads Institute",
-    rating: 4.6,
-    reviews: 95,
-    price: 55,
-    priceHidden: true,
-    location: "Los Angeles, CA",
-    image: "https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&q=80",
-    isActive: false,
-    nextAvailable: "Next Monday, 10:00 AM",
-  },
-  {
-    id: 3,
-    name: "Expert Drivers School",
-    rating: 4.9,
-    reviews: 156,
-    price: 70,
-    priceHidden: false,
-    location: "Seattle, WA",
-    image: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&q=80",
-    isActive: true,
-    nextAvailable: "Today, 5:30 PM",
-  },
-  {
-    id: 4,
-    name: "City Driving Center",
-    rating: 4.7,
-    reviews: 112,
-    price: 60,
-    priceHidden: true,
-    location: "Portland, OR",
-    image: "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80",
-    isActive: true,
-    nextAvailable: "Wednesday, 1:15 PM",
-  },
-];
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
+  const { data: schools, isLoading } = useQuery({
+    queryKey: ["schools"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("schools")
+        .select("*");
+      return data || [];
+    },
+  });
+
   return (
     <div className="min-h-screen bg-secondary">
       <div className="relative h-[40vh] bg-gradient-to-b from-primary/10 to-secondary flex items-center justify-center px-6">
@@ -73,11 +34,38 @@ const Index = () => {
           <FilterBar />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {MOCK_SCHOOLS.map((school) => (
-            <SchoolCard key={school.id} {...school} />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="animate-pulse">
+                <div className="aspect-video bg-gray-200 rounded-t-lg" />
+                <div className="p-6 space-y-4 border rounded-b-lg border-t-0">
+                  <div className="h-4 bg-gray-200 rounded w-2/3" />
+                  <div className="h-4 bg-gray-200 rounded w-1/2" />
+                  <div className="h-4 bg-gray-200 rounded w-3/4" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {schools?.map((school) => (
+              <SchoolCard
+                key={school.id}
+                id={school.id}
+                name={school.name}
+                rating={school.rating}
+                reviews={school.reviews}
+                price={school.price_per_hour || 0}
+                priceHidden={!school.price_per_hour}
+                location={school.location}
+                image={school.image_url}
+                isActive={school.is_active || false}
+                nextAvailable={school.next_available}
+              />
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );

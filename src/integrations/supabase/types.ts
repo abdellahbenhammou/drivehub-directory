@@ -9,7 +9,110 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      instructors: {
+        Row: {
+          created_at: string | null
+          gender: string | null
+          id: string
+          is_verified: boolean | null
+          name: string
+          profile_image: string | null
+          rating: number | null
+          school_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          gender?: string | null
+          id?: string
+          is_verified?: boolean | null
+          name: string
+          profile_image?: string | null
+          rating?: number | null
+          school_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          gender?: string | null
+          id?: string
+          is_verified?: boolean | null
+          name?: string
+          profile_image?: string | null
+          rating?: number | null
+          school_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "instructors_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      schools: {
+        Row: {
+          created_at: string | null
+          driving_classes: boolean | null
+          driving_price: number | null
+          id: string
+          image_url: string
+          is_active: boolean | null
+          location: string
+          name: string
+          next_available: string | null
+          price_per_hour: number | null
+          rating: number
+          reviews: number
+          safety_courses: boolean | null
+          safety_price: number | null
+          theory_classes: boolean | null
+          theory_price: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          driving_classes?: boolean | null
+          driving_price?: number | null
+          id?: string
+          image_url: string
+          is_active?: boolean | null
+          location: string
+          name: string
+          next_available?: string | null
+          price_per_hour?: number | null
+          rating: number
+          reviews: number
+          safety_courses?: boolean | null
+          safety_price?: number | null
+          theory_classes?: boolean | null
+          theory_price?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          driving_classes?: boolean | null
+          driving_price?: number | null
+          id?: string
+          image_url?: string
+          is_active?: boolean | null
+          location?: string
+          name?: string
+          next_available?: string | null
+          price_per_hour?: number | null
+          rating?: number
+          reviews?: number
+          safety_courses?: boolean | null
+          safety_price?: number | null
+          theory_classes?: boolean | null
+          theory_price?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
