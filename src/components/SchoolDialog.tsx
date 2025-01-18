@@ -1,8 +1,10 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card } from "@/components/ui/card";
-import { Star, CheckCircle2, XCircle, UserRound, Users } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { Star, CheckCircle2, XCircle, UserRound, Users, MapPin, Phone, MessageSquare } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 interface SchoolDialogProps {
   schoolId: string | null;
@@ -11,6 +13,9 @@ interface SchoolDialogProps {
 }
 
 export const SchoolDialog = ({ schoolId, isOpen, onClose }: SchoolDialogProps) => {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
   const { data: school } = useQuery({
     queryKey: ["school", schoolId],
     queryFn: async () => {
@@ -38,6 +43,84 @@ export const SchoolDialog = ({ schoolId, isOpen, onClose }: SchoolDialogProps) =
     enabled: !!schoolId,
   });
 
+  const { data: isSaved } = useQuery({
+    queryKey: ["saved_school", schoolId],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || !schoolId) return false;
+      
+      const { data } = await supabase
+        .from("saved_schools")
+        .select("id")
+        .eq("school_id", schoolId)
+        .eq("user_id", user.id)
+        .single();
+      
+      return !!data;
+    },
+    enabled: !!schoolId,
+  });
+
+  const saveSchoolMutation = useMutation({
+    mutationFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || !schoolId) throw new Error("User not authenticated");
+
+      const { error } = await supabase
+        .from("saved_schools")
+        .insert({ user_id: user.id, school_id: schoolId });
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["saved_school", schoolId] });
+      toast({
+        title: "School saved",
+        description: "This school has been added to your saved schools.",
+      });
+    },
+  });
+
+  const unsaveSchoolMutation = useMutation({
+    mutationFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || !schoolId) throw new Error("User not authenticated");
+
+      const { error } = await supabase
+        .from("saved_schools")
+        .delete()
+        .eq("school_id", schoolId)
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["saved_school", schoolId] });
+      toast({
+        title: "School removed",
+        description: "This school has been removed from your saved schools.",
+      });
+    },
+  });
+
+  const handleSaveToggle = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to save schools.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (isSaved) {
+      unsaveSchoolMutation.mutate();
+    } else {
+      saveSchoolMutation.mutate();
+    }
+  };
+
   if (!school) return null;
 
   return (
@@ -58,14 +141,50 @@ export const SchoolDialog = ({ schoolId, isOpen, onClose }: SchoolDialogProps) =
               />
             </div>
             <div className="flex-1 space-y-4">
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1 text-yellow-500">
-                  <Star className="fill-current w-5 h-5" />
-                  <span className="text-lg font-medium">{school.rating}</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 text-yellow-500">
+                    <Star className="fill-current w-5 h-5" />
+                    <span className="text-lg font-medium">{school.rating}</span>
+                  </div>
+                  <span className="text-muted-foreground">({school.reviews} reviews)</span>
                 </div>
-                <span className="text-muted-foreground">({school.reviews} reviews)</span>
+                <Button
+                  variant={isSaved ? "secondary" : "outline"}
+                  onClick={handleSaveToggle}
+                  disabled={saveSchoolMutation.isPending || unsaveSchoolMutation.isPending}
+                >
+                  {isSaved ? "Saved" : "Save School"}
+                </Button>
               </div>
-              <p className="text-lg text-muted-foreground">{school.location}</p>
+              
+              {/* Contact Information */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <MapPin className="w-4 h-4" />
+                  <span>{school.street}, {school.city} {school.zip_code}</span>
+                </div>
+                {school.phone && (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Phone className="w-4 h-4" />
+                    <a href={`tel:${school.phone}`} className="hover:underline">{school.phone}</a>
+                  </div>
+                )}
+                {school.whatsapp && (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <MessageSquare className="w-4 h-4" />
+                    <a 
+                      href={`https://wa.me/${school.whatsapp.replace(/\D/g, '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:underline"
+                    >
+                      WhatsApp
+                    </a>
+                  </div>
+                )}
+              </div>
+
               <div className="flex items-center gap-2">
                 <span className="px-3 py-1 bg-accent text-accent-foreground rounded-full text-sm">
                   ${school.price_per_hour}/hr

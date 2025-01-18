@@ -53,63 +53,113 @@ export type Database = {
           },
         ]
       }
+      saved_schools: {
+        Row: {
+          created_at: string | null
+          id: string
+          school_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          school_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          school_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_schools_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       schools: {
         Row: {
+          city: string | null
           created_at: string | null
           driving_classes: boolean | null
           driving_price: number | null
           id: string
           image_url: string
           is_active: boolean | null
+          latitude: number | null
           location: string
+          longitude: number | null
           name: string
           next_available: string | null
+          phone: string | null
           price_per_hour: number | null
           rating: number
           reviews: number
           safety_courses: boolean | null
           safety_price: number | null
+          street: string | null
           theory_classes: boolean | null
           theory_price: number | null
           updated_at: string | null
+          whatsapp: string | null
+          zip_code: string | null
         }
         Insert: {
+          city?: string | null
           created_at?: string | null
           driving_classes?: boolean | null
           driving_price?: number | null
           id?: string
           image_url: string
           is_active?: boolean | null
+          latitude?: number | null
           location: string
+          longitude?: number | null
           name: string
           next_available?: string | null
+          phone?: string | null
           price_per_hour?: number | null
           rating: number
           reviews: number
           safety_courses?: boolean | null
           safety_price?: number | null
+          street?: string | null
           theory_classes?: boolean | null
           theory_price?: number | null
           updated_at?: string | null
+          whatsapp?: string | null
+          zip_code?: string | null
         }
         Update: {
+          city?: string | null
           created_at?: string | null
           driving_classes?: boolean | null
           driving_price?: number | null
           id?: string
           image_url?: string
           is_active?: boolean | null
+          latitude?: number | null
           location?: string
+          longitude?: number | null
           name?: string
           next_available?: string | null
+          phone?: string | null
           price_per_hour?: number | null
           rating?: number
           reviews?: number
           safety_courses?: boolean | null
           safety_price?: number | null
+          street?: string | null
           theory_classes?: boolean | null
           theory_price?: number | null
           updated_at?: string | null
+          whatsapp?: string | null
+          zip_code?: string | null
         }
         Relationships: []
       }
