@@ -1,4 +1,4 @@
-import { Star, Circle } from "lucide-react";
+import { Star, Circle, Calendar } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -11,6 +11,7 @@ interface SchoolCardProps {
   location: string;
   image: string;
   isActive: boolean;
+  nextAvailable?: string;
 }
 
 export const SchoolCard = ({ 
@@ -21,7 +22,8 @@ export const SchoolCard = ({
   priceHidden = false,
   location, 
   image,
-  isActive
+  isActive,
+  nextAvailable
 }: SchoolCardProps) => {
   return (
     <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg animate-fade-in">
@@ -57,7 +59,13 @@ export const SchoolCard = ({
             className={`w-3 h-3 ${isActive ? 'fill-green-500 text-green-500' : 'fill-gray-300 text-gray-300'}`}
           />
         </div>
-        <p className="text-muted-foreground">{location}</p>
+        <p className="text-muted-foreground mb-3">{location}</p>
+        {nextAvailable && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Calendar className="w-4 h-4" />
+            <span>Next available: {nextAvailable}</span>
+          </div>
+        )}
       </div>
     </Card>
   );
