@@ -1,4 +1,4 @@
-import { Star, Circle, Calendar } from "lucide-react";
+import { Star, Circle, Calendar, Car } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -62,7 +62,10 @@ export const SchoolCard = ({
         <p className="text-muted-foreground mb-3">{location}</p>
         {nextAvailable && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Calendar className="w-4 h-4" />
+            <div className="flex items-center gap-1">
+              <Calendar className="w-4 h-4" />
+              <Car className="w-3 h-3 animate-[move-right_2s_ease-in-out_infinite]" />
+            </div>
             <span>Next available: {nextAvailable}</span>
           </div>
         )}
