@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card } from "@/components/ui/card";
-import { Star, CheckCircle2, XCircle, Male, Female, Users } from "lucide-react";
+import { Star, CheckCircle2, XCircle, Triangle, Circle, Users } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
