@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card } from "@/components/ui/card";
-import { Star, CheckCircle2, XCircle, Triangle, Circle, Users } from "lucide-react";
+import { Star, CheckCircle2, XCircle, UserRound, Users } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -119,9 +119,9 @@ export const SchoolDialog = ({ schoolId, isOpen, onClose }: SchoolDialogProps) =
                       </div>
                       <div className="flex items-center gap-2 text-muted-foreground">
                         {instructor.gender === "male" ? (
-                          <Male className="w-4 h-4" />
+                          <UserRound className="w-4 h-4" />
                         ) : instructor.gender === "female" ? (
-                          <Female className="w-4 h-4" />
+                          <UserRound className="w-4 h-4" />
                         ) : (
                           <Users className="w-4 h-4" />
                         )}
