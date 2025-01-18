@@ -1,4 +1,4 @@
-import { Star } from "lucide-react";
+import { Star, Circle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -10,6 +10,7 @@ interface SchoolCardProps {
   priceHidden?: boolean;
   location: string;
   image: string;
+  isActive: boolean;
 }
 
 export const SchoolCard = ({ 
@@ -19,7 +20,8 @@ export const SchoolCard = ({
   price, 
   priceHidden = false,
   location, 
-  image 
+  image,
+  isActive
 }: SchoolCardProps) => {
   return (
     <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg animate-fade-in">
@@ -47,9 +49,14 @@ export const SchoolCard = ({
             <span className="text-sm text-gray-500">({reviews})</span>
           </div>
         </div>
-        <h3 className="text-xl font-semibold mb-2 group-hover:text-primary transition-colors">
-          {name}
-        </h3>
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-xl font-semibold group-hover:text-primary transition-colors">
+            {name}
+          </h3>
+          <Circle 
+            className={`w-3 h-3 ${isActive ? 'fill-green-500 text-green-500' : 'fill-gray-300 text-gray-300'}`}
+          />
+        </div>
         <p className="text-muted-foreground">{location}</p>
       </div>
     </Card>

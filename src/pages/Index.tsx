@@ -12,6 +12,7 @@ const MOCK_SCHOOLS = [
     priceHidden: false,
     location: "San Francisco, CA",
     image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&q=80",
+    isActive: true,
   },
   {
     id: 2,
@@ -22,6 +23,7 @@ const MOCK_SCHOOLS = [
     priceHidden: true,
     location: "Los Angeles, CA",
     image: "https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&q=80",
+    isActive: false,
   },
   {
     id: 3,
@@ -32,6 +34,7 @@ const MOCK_SCHOOLS = [
     priceHidden: false,
     location: "Seattle, WA",
     image: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&q=80",
+    isActive: true,
   },
   {
     id: 4,
@@ -42,6 +45,7 @@ const MOCK_SCHOOLS = [
     priceHidden: true,
     location: "Portland, OR",
     image: "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80",
+    isActive: true,
   },
 ];
 
