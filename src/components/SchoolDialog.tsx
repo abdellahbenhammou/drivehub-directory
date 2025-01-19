@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogOverlay } from "@/components/ui/dialog";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Star, CheckCircle2, XCircle, UserRound, Users, MapPin, Phone, MessageSquare, ChevronLeft, ChevronRight } from "lucide-react";
@@ -51,11 +51,8 @@ export const SchoolDialog = ({ schoolId, isOpen, onClose }: SchoolDialogProps) =
       : (currentIndex - 1 + schools.length) % schools.length;
     
     const newSchoolId = schools[newIndex].id;
-    onClose();
-    setTimeout(() => {
-      window.history.pushState({}, '', `?school=${newSchoolId}`);
-      window.dispatchEvent(new Event('popstate'));
-    }, 300);
+    window.history.pushState({}, '', `?school=${newSchoolId}`);
+    window.dispatchEvent(new Event('popstate'));
   };
 
   const handleSaveToggle = () => {
@@ -77,6 +74,24 @@ export const SchoolDialog = ({ schoolId, isOpen, onClose }: SchoolDialogProps) =
 
   return (
     <Dialog open={isOpen} onOpenChange={() => onClose()}>
+      <DialogOverlay className="relative">
+        <Button
+          variant="outline"
+          size="icon"
+          className="absolute left-8 top-1/2 -translate-y-1/2 z-50 bg-white/90 hover:bg-white"
+          onClick={() => navigateSchool('prev')}
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          className="absolute right-8 top-1/2 -translate-y-1/2 z-50 bg-white/90 hover:bg-white"
+          onClick={() => navigateSchool('next')}
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </DialogOverlay>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">{currentSchool.name}</DialogTitle>
@@ -84,15 +99,6 @@ export const SchoolDialog = ({ schoolId, isOpen, onClose }: SchoolDialogProps) =
 
         <div className="space-y-6">
           <div className="flex items-start gap-6">
-            <Button
-              variant="outline"
-              size="icon"
-              className="absolute left-4 top-1/2"
-              onClick={() => navigateSchool('prev')}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            
             <div className="w-1/3">
               <img
                 src={currentSchool.image_url}
@@ -149,15 +155,6 @@ export const SchoolDialog = ({ schoolId, isOpen, onClose }: SchoolDialogProps) =
                 </span>
               </div>
             </div>
-
-            <Button
-              variant="outline"
-              size="icon"
-              className="absolute right-4 top-1/2"
-              onClick={() => navigateSchool('next')}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
           </div>
 
           <div className="grid grid-cols-3 gap-4">
