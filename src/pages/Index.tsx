@@ -3,6 +3,14 @@ import { FilterBar } from "@/components/FilterBar";
 import { SchoolCard } from "@/components/SchoolCard";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Separator } from "@/components/ui/separator";
+
+const backgroundImages = [
+  "/driving-school-1.jpg",
+  "/happy-driver.jpg",
+  "/learning-drive.jpg",
+  "/car-lesson.jpg"
+];
 
 const Index = () => {
   const { data: schools, isLoading } = useQuery({
@@ -16,20 +24,36 @@ const Index = () => {
   });
 
   return (
-    <div className="min-h-screen bg-secondary">
-      <div className="relative h-[40vh] bg-gradient-to-b from-primary/10 to-secondary flex items-center justify-center px-6">
+    <div className="min-h-screen bg-secondary relative">
+      {/* Background Slideshow */}
+      <div className="fixed inset-0 -z-10">
+        {backgroundImages.map((image, index) => (
+          <div
+            key={image}
+            className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000"
+            style={{
+              backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url(${image})`,
+              animation: `fadeInOut 16s infinite ${index * 4}s`
+            }}
+          />
+        ))}
+      </div>
+
+      <div className="relative h-[40vh] bg-gradient-to-b from-primary/10 to-secondary/95 flex items-center justify-center px-6">
         <div className="text-center animate-fade-in-up">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900">
+          <h1 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900 drop-shadow-sm">
             Find Your Perfect Driving School
           </h1>
-          <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-800 mb-8 max-w-2xl mx-auto font-medium">
             Compare top-rated driving schools in your area and start your journey to becoming a confident driver.
           </p>
           <SearchBar />
         </div>
       </div>
 
-      <main className="container mx-auto px-6 py-12">
+      <Separator className="w-full my-8 opacity-50" />
+
+      <main className="container mx-auto px-6 py-12 relative z-10 bg-white/80 rounded-lg shadow-lg">
         <div className="mb-8">
           <FilterBar />
         </div>

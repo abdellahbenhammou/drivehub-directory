@@ -74,22 +74,22 @@ export const SchoolDialog = ({ schoolId, isOpen, onClose }: SchoolDialogProps) =
 
   return (
     <Dialog open={isOpen} onOpenChange={() => onClose()}>
-      <DialogOverlay className="relative">
+      <DialogOverlay className="bg-black/80">
         <Button
           variant="outline"
           size="icon"
-          className="absolute left-8 top-1/2 -translate-y-1/2 z-50 bg-white/90 hover:bg-white"
+          className="fixed left-8 top-1/2 -translate-y-1/2 z-50 bg-white/90 hover:bg-white transition-all duration-300 shadow-lg hover:shadow-xl"
           onClick={() => navigateSchool('prev')}
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="h-6 w-6" />
         </Button>
         <Button
           variant="outline"
           size="icon"
-          className="absolute right-8 top-1/2 -translate-y-1/2 z-50 bg-white/90 hover:bg-white"
+          className="fixed right-8 top-1/2 -translate-y-1/2 z-50 bg-white/90 hover:bg-white transition-all duration-300 shadow-lg hover:shadow-xl"
           onClick={() => navigateSchool('next')}
         >
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="h-6 w-6" />
         </Button>
       </DialogOverlay>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
