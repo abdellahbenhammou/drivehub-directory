@@ -1,10 +1,11 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Star, CheckCircle2, XCircle, UserRound, Users, MapPin, Phone, MessageSquare } from "lucide-react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Star, CheckCircle2, XCircle, UserRound, Users, MapPin, Phone, MessageSquare, ChevronLeft, ChevronRight } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { useSavedSchools } from "@/hooks/useSavedSchools";
 
 interface SchoolDialogProps {
   schoolId: string | null;
@@ -14,20 +15,16 @@ interface SchoolDialogProps {
 
 export const SchoolDialog = ({ schoolId, isOpen, onClose }: SchoolDialogProps) => {
   const { toast } = useToast();
-  const queryClient = useQueryClient();
+  const { toggleSavedSchool, isSchoolSaved } = useSavedSchools();
 
-  const { data: school } = useQuery({
-    queryKey: ["school", schoolId],
+  const { data: schools } = useQuery({
+    queryKey: ["schools"],
     queryFn: async () => {
-      if (!schoolId) return null;
       const { data } = await supabase
         .from("schools")
-        .select("*")
-        .eq("id", schoolId)
-        .single();
-      return data;
+        .select("*");
+      return data || [];
     },
-    enabled: !!schoolId,
   });
 
   const { data: instructors } = useQuery({
@@ -43,100 +40,63 @@ export const SchoolDialog = ({ schoolId, isOpen, onClose }: SchoolDialogProps) =
     enabled: !!schoolId,
   });
 
-  const { data: isSaved } = useQuery({
-    queryKey: ["saved_school", schoolId],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user || !schoolId) return false;
-      
-      const { data } = await supabase
-        .from("saved_schools")
-        .select("id")
-        .eq("school_id", schoolId)
-        .eq("user_id", user.id)
-        .single();
-      
-      return !!data;
-    },
-    enabled: !!schoolId,
-  });
+  const currentSchool = schools?.find(s => s.id === schoolId);
+  const currentIndex = schools?.findIndex(s => s.id === schoolId) ?? -1;
 
-  const saveSchoolMutation = useMutation({
-    mutationFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user || !schoolId) throw new Error("User not authenticated");
-
-      const { error } = await supabase
-        .from("saved_schools")
-        .insert({ user_id: user.id, school_id: schoolId });
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["saved_school", schoolId] });
-      toast({
-        title: "School saved",
-        description: "This school has been added to your saved schools.",
-      });
-    },
-  });
-
-  const unsaveSchoolMutation = useMutation({
-    mutationFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user || !schoolId) throw new Error("User not authenticated");
-
-      const { error } = await supabase
-        .from("saved_schools")
-        .delete()
-        .eq("school_id", schoolId)
-        .eq("user_id", user.id);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["saved_school", schoolId] });
-      toast({
-        title: "School removed",
-        description: "This school has been removed from your saved schools.",
-      });
-    },
-  });
-
-  const handleSaveToggle = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to save schools.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (isSaved) {
-      unsaveSchoolMutation.mutate();
-    } else {
-      saveSchoolMutation.mutate();
-    }
+  const navigateSchool = (direction: 'next' | 'prev') => {
+    if (!schools) return;
+    
+    let newIndex = direction === 'next' 
+      ? (currentIndex + 1) % schools.length
+      : (currentIndex - 1 + schools.length) % schools.length;
+    
+    const newSchoolId = schools[newIndex].id;
+    onClose();
+    setTimeout(() => {
+      window.history.pushState({}, '', `?school=${newSchoolId}`);
+      window.dispatchEvent(new Event('popstate'));
+    }, 300);
   };
 
-  if (!school) return null;
+  const handleSaveToggle = () => {
+    if (!schoolId) return;
+    toggleSavedSchool(schoolId);
+    toast({
+      title: isSchoolSaved(schoolId) ? "School removed" : "School saved",
+      description: isSchoolSaved(schoolId) 
+        ? "This school has been removed from your saved schools."
+        : "This school has been added to your saved schools.",
+    });
+  };
+
+  if (!currentSchool) return null;
+
+  const formatPrice = (price: number) => {
+    return `${price.toLocaleString()} MAD`;
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={() => onClose()}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">{school.name}</DialogTitle>
+          <DialogTitle className="text-2xl font-bold">{currentSchool.name}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Main School Info */}
           <div className="flex items-start gap-6">
+            <Button
+              variant="outline"
+              size="icon"
+              className="absolute left-4 top-1/2"
+              onClick={() => navigateSchool('prev')}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            
             <div className="w-1/3">
               <img
-                src={school.image_url}
-                alt={school.name}
+                src={currentSchool.image_url}
+                alt={currentSchool.name}
                 className="w-full h-48 object-cover rounded-lg"
               />
             </div>
@@ -145,36 +105,34 @@ export const SchoolDialog = ({ schoolId, isOpen, onClose }: SchoolDialogProps) =
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-1 text-yellow-500">
                     <Star className="fill-current w-5 h-5" />
-                    <span className="text-lg font-medium">{school.rating}</span>
+                    <span className="text-lg font-medium">{currentSchool.rating}</span>
                   </div>
-                  <span className="text-muted-foreground">({school.reviews} reviews)</span>
+                  <span className="text-muted-foreground">({currentSchool.reviews} reviews)</span>
                 </div>
                 <Button
-                  variant={isSaved ? "secondary" : "outline"}
+                  variant={isSchoolSaved(currentSchool.id) ? "secondary" : "outline"}
                   onClick={handleSaveToggle}
-                  disabled={saveSchoolMutation.isPending || unsaveSchoolMutation.isPending}
                 >
-                  {isSaved ? "Saved" : "Save School"}
+                  {isSchoolSaved(currentSchool.id) ? "Saved" : "Save School"}
                 </Button>
               </div>
               
-              {/* Contact Information */}
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <MapPin className="w-4 h-4" />
-                  <span>{school.street}, {school.city} {school.zip_code}</span>
+                  <span>{currentSchool.street}, {currentSchool.city} {currentSchool.zip_code}</span>
                 </div>
-                {school.phone && (
+                {currentSchool.phone && (
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Phone className="w-4 h-4" />
-                    <a href={`tel:${school.phone}`} className="hover:underline">{school.phone}</a>
+                    <a href={`tel:${currentSchool.phone}`} className="hover:underline">{currentSchool.phone}</a>
                   </div>
                 )}
-                {school.whatsapp && (
+                {currentSchool.whatsapp && (
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <MessageSquare className="w-4 h-4" />
                     <a 
-                      href={`https://wa.me/${school.whatsapp.replace(/\D/g, '')}`}
+                      href={`https://wa.me/${currentSchool.whatsapp.replace(/\D/g, '')}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="hover:underline"
@@ -187,76 +145,85 @@ export const SchoolDialog = ({ schoolId, isOpen, onClose }: SchoolDialogProps) =
 
               <div className="flex items-center gap-2">
                 <span className="px-3 py-1 bg-accent text-accent-foreground rounded-full text-sm">
-                  ${school.price_per_hour}/hr
+                  {formatPrice(currentSchool.price_per_hour)}
                 </span>
               </div>
             </div>
+
+            <Button
+              variant="outline"
+              size="icon"
+              className="absolute right-4 top-1/2"
+              onClick={() => navigateSchool('next')}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
           </div>
 
-          {/* Services */}
           <div className="grid grid-cols-3 gap-4">
-            {school.theory_classes && (
+            {currentSchool.theory_classes && (
               <Card className="p-4">
                 <h3 className="font-semibold mb-2">Theory Classes</h3>
-                <p className="text-muted-foreground">${school.theory_price}/course</p>
+                <p className="text-muted-foreground">{formatPrice(currentSchool.theory_price)}/course</p>
               </Card>
             )}
-            {school.driving_classes && (
+            {currentSchool.driving_classes && (
               <Card className="p-4">
                 <h3 className="font-semibold mb-2">Driving Classes</h3>
-                <p className="text-muted-foreground">${school.driving_price}/hr</p>
+                <p className="text-muted-foreground">{formatPrice(currentSchool.driving_price)}/hr</p>
               </Card>
             )}
-            {school.safety_courses && (
+            {currentSchool.safety_courses && (
               <Card className="p-4">
                 <h3 className="font-semibold mb-2">Safety Courses</h3>
-                <p className="text-muted-foreground">${school.safety_price}/course</p>
+                <p className="text-muted-foreground">{formatPrice(currentSchool.safety_price)}/course</p>
               </Card>
             )}
           </div>
 
-          {/* Instructors */}
-          <div>
-            <h3 className="text-xl font-semibold mb-4">Our Instructors</h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {instructors?.map((instructor) => (
-                <Card key={instructor.id} className="p-4">
-                  <div className="flex items-start gap-3">
-                    <img
-                      src={instructor.profile_image || "/placeholder.svg"}
-                      alt={instructor.name}
-                      className="w-16 h-16 rounded-full object-cover"
-                    />
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-medium">{instructor.name}</h4>
-                        {instructor.is_verified ? (
-                          <CheckCircle2 className="w-4 h-4 text-green-500" />
-                        ) : (
-                          <XCircle className="w-4 h-4 text-gray-300" />
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        {instructor.gender === "male" ? (
-                          <UserRound className="w-4 h-4" />
-                        ) : instructor.gender === "female" ? (
-                          <UserRound className="w-4 h-4" />
-                        ) : (
-                          <Users className="w-4 h-4" />
-                        )}
-                        {instructor.rating && (
-                          <div className="flex items-center gap-1">
-                            <Star className="w-4 h-4 fill-yellow-500 text-yellow-500" />
-                            <span>{instructor.rating}</span>
-                          </div>
-                        )}
+          {instructors && instructors.length > 0 && (
+            <div>
+              <h3 className="text-xl font-semibold mb-4">Our Instructors</h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {instructors.map((instructor) => (
+                  <Card key={instructor.id} className="p-4">
+                    <div className="flex items-start gap-3">
+                      <img
+                        src={instructor.profile_image || "/placeholder.svg"}
+                        alt={instructor.name}
+                        className="w-16 h-16 rounded-full object-cover"
+                      />
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-medium">{instructor.name}</h4>
+                          {instructor.is_verified ? (
+                            <CheckCircle2 className="w-4 h-4 text-green-500" />
+                          ) : (
+                            <XCircle className="w-4 h-4 text-gray-300" />
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          {instructor.gender === "male" ? (
+                            <UserRound className="w-4 h-4" />
+                          ) : instructor.gender === "female" ? (
+                            <UserRound className="w-4 h-4" />
+                          ) : (
+                            <Users className="w-4 h-4" />
+                          )}
+                          {instructor.rating && (
+                            <div className="flex items-center gap-1">
+                              <Star className="w-4 h-4 fill-yellow-500 text-yellow-500" />
+                              <span>{instructor.rating}</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </Card>
-              ))}
+                  </Card>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>

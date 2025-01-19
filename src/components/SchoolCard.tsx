@@ -31,6 +31,10 @@ export const SchoolCard = ({
 }: SchoolCardProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+  const formatPrice = (price: number) => {
+    return `${price.toLocaleString()} MAD`;
+  };
+
   return (
     <>
       <Card 
@@ -52,7 +56,7 @@ export const SchoolCard = ({
               </Button>
             ) : (
               <span className="px-3 py-1 bg-accent text-accent-foreground text-sm font-medium rounded-full">
-                ${price}/hr
+                {formatPrice(price)}/hr
               </span>
             )}
             <div className="flex items-center gap-1 text-yellow-500">
