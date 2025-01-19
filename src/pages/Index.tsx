@@ -4,6 +4,9 @@ import { SchoolCard } from "@/components/SchoolCard";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import { LogIn } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const backgroundImages = [
   "/driving-school-1.jpg",
@@ -40,6 +43,14 @@ const Index = () => {
       </div>
 
       <div className="relative h-[40vh] bg-gradient-to-b from-primary/10 to-secondary/95 flex items-center justify-center px-6">
+        <div className="absolute top-4 right-4">
+          <Link to="/business-partner">
+            <Button variant="outline" className="gap-2 text-primary hover:text-primary-foreground">
+              <LogIn className="w-4 h-4" />
+              Business Partner Login
+            </Button>
+          </Link>
+        </div>
         <div className="text-center animate-fade-in-up">
           <h1 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900 drop-shadow-sm">
             Find Your Perfect Driving School
