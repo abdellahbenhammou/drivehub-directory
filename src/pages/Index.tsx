@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { LogIn } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useState } from "react";
 
 const backgroundImages = [
   "/driving-school-1.jpg",
@@ -16,12 +17,26 @@ const backgroundImages = [
 ];
 
 const Index = () => {
+  const [selectedLocation, setSelectedLocation] = useState<string>("");
+
   const { data: schools, isLoading } = useQuery({
-    queryKey: ["schools"],
+    queryKey: ["schools", selectedLocation],
     queryFn: async () => {
-      const { data } = await supabase
+      let query = supabase
         .from("schools")
         .select("*");
+      
+      if (selectedLocation) {
+        // Handle both city and district filtering
+        const [city, district] = selectedLocation.split(" - ");
+        if (district) {
+          query = query.like('location', `%${district}%`);
+        } else {
+          query = query.like('location', `%${city}%`);
+        }
+      }
+
+      const { data } = await query;
       return data || [];
     },
   });
@@ -66,7 +81,7 @@ const Index = () => {
 
       <main className="container mx-auto px-6 py-12 relative z-10 bg-white/80 rounded-lg shadow-lg">
         <div className="mb-8">
-          <FilterBar />
+          <FilterBar onLocationChange={setSelectedLocation} />
         </div>
 
         {isLoading ? (
