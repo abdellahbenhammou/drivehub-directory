@@ -17,23 +17,38 @@ const backgroundImages = [
 ];
 
 const Index = () => {
-  const [selectedLocation, setSelectedLocation] = useState<string>("");
+  const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
+  const [maxPrice, setMaxPrice] = useState<number>(5000);
+  const [selectedRatings, setSelectedRatings] = useState<number[]>([]);
+  const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
 
   const { data: schools, isLoading } = useQuery({
-    queryKey: ["schools", selectedLocation],
+    queryKey: ["schools", selectedLocation, maxPrice, selectedRatings, selectedLanguage],
     queryFn: async () => {
       let query = supabase
         .from("schools")
         .select("*");
       
       if (selectedLocation) {
-        // Handle both city and district filtering
         const [city, district] = selectedLocation.split(" - ");
         if (district) {
           query = query.like('location', `%${district}%`);
         } else {
           query = query.like('location', `%${city}%`);
         }
+      }
+
+      if (maxPrice < 5000) {
+        query = query.lte('price_per_hour', maxPrice);
+      }
+
+      if (selectedRatings.length > 0) {
+        query = query.in('rating', selectedRatings);
+      }
+
+      if (selectedLanguage) {
+        // Note: This assumes there's a language column in the schools table
+        query = query.eq('language', selectedLanguage);
       }
 
       const { data } = await query;
@@ -81,7 +96,12 @@ const Index = () => {
 
       <main className="container mx-auto px-6 py-12 relative z-10 bg-white/80 rounded-lg shadow-lg">
         <div className="mb-8">
-          <FilterBar onLocationChange={setSelectedLocation} />
+          <FilterBar 
+            onLocationChange={setSelectedLocation}
+            onPriceChange={setMaxPrice}
+            onRatingChange={setSelectedRatings}
+            onLanguageChange={setSelectedLanguage}
+          />
         </div>
 
         {isLoading ? (

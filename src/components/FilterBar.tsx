@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { MapPin, DollarSign, Star, Languages, Search } from "lucide-react";
+import { MapPin, DollarSign, Star, Languages, Search, XCircle } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,8 +10,8 @@ import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState } from "react";
+import { Slider } from "@/components/ui/slider";
 
-// Major cities with their districts
 const MOROCCAN_CITIES = {
   "Casablanca": ["Anfa", "Sidi Belyout", "Maarif", "Ain Sebaa", "Hay Mohammadi"],
   "Rabat": ["Agdal", "Hassan", "Yacoub El Mansour", "Souissi"],
@@ -31,16 +31,52 @@ const MOROCCAN_CITIES = {
 };
 
 interface FilterBarProps {
-  onLocationChange: (location: string) => void;
+  onLocationChange: (location: string | null) => void;
+  onPriceChange: (price: number) => void;
+  onRatingChange: (ratings: number[]) => void;
+  onLanguageChange: (language: string | null) => void;
 }
 
-export const FilterBar = ({ onLocationChange }: FilterBarProps) => {
+export const FilterBar = ({ 
+  onLocationChange, 
+  onPriceChange, 
+  onRatingChange,
+  onLanguageChange 
+}: FilterBarProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLocation, setSelectedLocation] = useState<string>("");
+  const [priceRange, setPriceRange] = useState<number>(5000);
+  const [selectedRatings, setSelectedRatings] = useState<number[]>([]);
+  const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
 
   const handleLocationSelect = (location: string) => {
     setSelectedLocation(location);
     onLocationChange(location);
+  };
+
+  const handleLocationClear = () => {
+    setSelectedLocation("");
+    onLocationChange(null);
+  };
+
+  const handlePriceChange = (value: number[]) => {
+    const price = value[0];
+    setPriceRange(price);
+    onPriceChange(price);
+  };
+
+  const handleRatingToggle = (rating: number) => {
+    const newRatings = selectedRatings.includes(rating)
+      ? selectedRatings.filter(r => r !== rating)
+      : [...selectedRatings, rating];
+    setSelectedRatings(newRatings);
+    onRatingChange(newRatings);
+  };
+
+  const handleLanguageSelect = (language: string) => {
+    const newLanguage = selectedLanguage === language ? null : language;
+    setSelectedLanguage(newLanguage);
+    onLanguageChange(newLanguage);
   };
 
   const filteredCities = Object.entries(MOROCCAN_CITIES).filter(([city]) =>
@@ -55,6 +91,15 @@ export const FilterBar = ({ onLocationChange }: FilterBarProps) => {
             <Button variant="outline" className="flex items-center gap-2">
               <MapPin className="w-4 h-4" />
               {selectedLocation || "Location"}
+              {selectedLocation && (
+                <XCircle 
+                  className="w-4 h-4 ml-2 text-muted-foreground hover:text-destructive"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleLocationClear();
+                  }}
+                />
+              )}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent 
@@ -96,34 +141,79 @@ export const FilterBar = ({ onLocationChange }: FilterBarProps) => {
             </ScrollArea>
           </DropdownMenuContent>
         </DropdownMenu>
-        <Button variant="outline" className="flex items-center gap-2">
-          <DollarSign className="w-4 h-4" />
-          Price Range
-        </Button>
-        <Button variant="outline" className="flex items-center gap-2">
-          <Star className="w-4 h-4" />
-          Rating
-        </Button>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="flex items-center gap-2">
+              <DollarSign className="w-4 h-4" />
+              Price Range: {priceRange} MAD
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent 
+            align="start" 
+            className="w-[280px] p-4 bg-white/95 backdrop-blur-sm border-2"
+          >
+            <Slider
+              defaultValue={[5000]}
+              max={5000}
+              step={100}
+              onValueChange={handlePriceChange}
+              className="mb-2"
+            />
+            <div className="text-sm text-center text-muted-foreground">
+              Max: {priceRange} MAD
+            </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="flex items-center gap-2">
+              <Star className="w-4 h-4" />
+              Rating
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent 
+            align="start" 
+            className="w-[200px] p-2 bg-white/95 backdrop-blur-sm border-2"
+          >
+            <div className="flex flex-wrap gap-1">
+              {[5, 4, 3, 2, 1].map((rating) => (
+                <Button
+                  key={rating}
+                  variant="ghost"
+                  size="sm"
+                  className={`p-1 ${selectedRatings.includes(rating) ? 'text-yellow-500' : 'text-gray-300'}`}
+                  onClick={() => handleRatingToggle(rating)}
+                >
+                  <Star className={`w-5 h-5 ${selectedRatings.includes(rating) ? 'fill-yellow-500' : 'fill-gray-300'}`} />
+                </Button>
+              ))}
+            </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="flex items-center gap-2">
               <Languages className="w-4 h-4" />
-              Language
+              {selectedLanguage || "Language"}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent 
             align="end" 
             className="w-[160px] bg-white/95 backdrop-blur-sm border-2"
           >
-            <DropdownMenuItem className="text-gray-800 font-medium hover:bg-primary hover:text-white">
-              Arabic
-            </DropdownMenuItem>
-            <DropdownMenuItem className="text-gray-800 font-medium hover:bg-primary hover:text-white">
-              French
-            </DropdownMenuItem>
-            <DropdownMenuItem className="text-gray-800 font-medium hover:bg-primary hover:text-white">
-              English
-            </DropdownMenuItem>
+            {["Arabic", "French", "English"].map((language) => (
+              <DropdownMenuItem 
+                key={language}
+                className={`text-gray-800 font-medium hover:bg-primary hover:text-white cursor-pointer
+                  ${selectedLanguage === language ? 'bg-primary/10' : ''}`}
+                onClick={() => handleLanguageSelect(language)}
+              >
+                {language}
+              </DropdownMenuItem>
+            ))}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
