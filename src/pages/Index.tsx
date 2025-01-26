@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { LogIn } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { PostgrestFilterBuilder } from "@supabase/postgrest-js";
 
 const backgroundImages = [
   "/driving-school-1.jpg",
@@ -15,6 +16,18 @@ const backgroundImages = [
   "/learning-drive.jpg",
   "/car-lesson.jpg"
 ];
+
+interface School {
+  id: string;
+  name: string;
+  rating: number;
+  reviews: number;
+  price_per_hour: number | null;
+  location: string;
+  image_url: string;
+  is_active: boolean;
+  next_available: string | null;
+}
 
 const Index = () => {
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
@@ -28,7 +41,7 @@ const Index = () => {
       let query = supabase
         .from("schools")
         .select("*");
-      
+
       if (selectedLocation) {
         const [city, district] = selectedLocation.split(" - ");
         if (district) {
@@ -47,12 +60,16 @@ const Index = () => {
       }
 
       if (selectedLanguage) {
-        // Note: This assumes there's a language column in the schools table
         query = query.eq('language', selectedLanguage);
       }
 
-      const { data } = await query;
-      return data || [];
+      const { data, error } = await query;
+      
+      if (error) {
+        throw error;
+      }
+
+      return (data || []) as School[];
     },
   });
 
