@@ -22,7 +22,7 @@ export function BusinessPartnerDashboard({ profile }: Props) {
         .from("schools")
         .select("*")
         .eq("id", profile.school_id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
