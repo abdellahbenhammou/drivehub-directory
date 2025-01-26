@@ -20,7 +20,8 @@ export const SchoolDialog = ({ schoolId, isOpen, onClose }: SchoolDialogProps) =
     queryFn: async () => {
       const { data } = await supabase
         .from("schools")
-        .select("*");
+        .select("*")
+        .order('name');
       return data || [];
     },
   });
@@ -42,14 +43,16 @@ export const SchoolDialog = ({ schoolId, isOpen, onClose }: SchoolDialogProps) =
   const currentIndex = schools?.findIndex(s => s.id === schoolId) ?? -1;
 
   const navigateSchool = (direction: 'next' | 'prev') => {
-    if (!schools) return;
+    if (!schools?.length) return;
     
     let newIndex = direction === 'next' 
       ? (currentIndex + 1) % schools.length
       : (currentIndex - 1 + schools.length) % schools.length;
     
     const newSchoolId = schools[newIndex].id;
-    window.history.pushState({}, '', `?school=${newSchoolId}`);
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.set('school', newSchoolId);
+    window.history.pushState({}, '', `?${searchParams.toString()}`);
     window.dispatchEvent(new Event('popstate'));
   };
 
@@ -62,7 +65,10 @@ export const SchoolDialog = ({ schoolId, isOpen, onClose }: SchoolDialogProps) =
           variant="outline"
           size="icon"
           className="fixed left-8 top-1/2 -translate-y-1/2 z-50 bg-white/90 hover:bg-white transition-all duration-300 shadow-lg hover:shadow-xl"
-          onClick={() => navigateSchool('prev')}
+          onClick={(e) => {
+            e.stopPropagation();
+            navigateSchool('prev');
+          }}
         >
           <ChevronLeft className="h-6 w-6" />
         </Button>
@@ -70,7 +76,10 @@ export const SchoolDialog = ({ schoolId, isOpen, onClose }: SchoolDialogProps) =
           variant="outline"
           size="icon"
           className="fixed right-8 top-1/2 -translate-y-1/2 z-50 bg-white/90 hover:bg-white transition-all duration-300 shadow-lg hover:shadow-xl"
-          onClick={() => navigateSchool('next')}
+          onClick={(e) => {
+            e.stopPropagation();
+            navigateSchool('next');
+          }}
         >
           <ChevronRight className="h-6 w-6" />
         </Button>
