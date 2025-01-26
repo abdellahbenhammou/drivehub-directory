@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogOverlay } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { SchoolHeader } from "./school-dialog/SchoolHeader";
@@ -8,6 +8,7 @@ import { SchoolContact } from "./school-dialog/SchoolContact";
 import { SchoolServices } from "./school-dialog/SchoolServices";
 import { InstructorsList } from "./school-dialog/InstructorsList";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface SchoolDialogProps {
   schoolId: string | null;
@@ -16,6 +17,7 @@ interface SchoolDialogProps {
 }
 
 export const SchoolDialog = ({ schoolId: initialSchoolId, isOpen, onClose }: SchoolDialogProps) => {
+  const navigate = useNavigate();
   const [currentSchoolId, setCurrentSchoolId] = useState(initialSchoolId);
 
   useEffect(() => {
@@ -33,6 +35,19 @@ export const SchoolDialog = ({ schoolId: initialSchoolId, isOpen, onClose }: Sch
     },
   });
 
+  const { data: businessPartner } = useQuery({
+    queryKey: ["business_partner", currentSchoolId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("business_partner_profiles")
+        .select("*")
+        .eq("school_id", currentSchoolId)
+        .single();
+      return data;
+    },
+    enabled: !!currentSchoolId,
+  });
+
   const { data: instructors } = useQuery({
     queryKey: ["instructors", currentSchoolId],
     queryFn: async () => {
@@ -48,6 +63,10 @@ export const SchoolDialog = ({ schoolId: initialSchoolId, isOpen, onClose }: Sch
 
   const currentSchool = schools?.find(s => s.id === currentSchoolId);
   const currentIndex = schools?.findIndex(s => s.id === currentSchoolId) ?? -1;
+
+  const isActive = businessPartner?.last_login 
+    ? new Date(businessPartner.last_login) > new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)
+    : false;
 
   const navigateSchool = (direction: 'next' | 'prev') => {
     if (!schools?.length) return;
@@ -126,7 +145,19 @@ export const SchoolDialog = ({ schoolId: initialSchoolId, isOpen, onClose }: Sch
                 <span className="px-3 py-1 bg-accent text-accent-foreground rounded-full text-sm">
                   {currentSchool.price_per_hour?.toLocaleString()} MAD
                 </span>
+                <div className={`w-3 h-3 rounded-full ${isActive ? 'bg-green-500' : 'bg-gray-300'}`} />
               </div>
+
+              <Button 
+                className="w-full"
+                onClick={() => {
+                  onClose();
+                  navigate(`/school/${currentSchool.id}`);
+                }}
+              >
+                View Details
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
             </div>
           </div>
 

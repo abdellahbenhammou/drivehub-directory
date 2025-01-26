@@ -10,6 +10,7 @@ import BusinessPartner from "./pages/BusinessPartner";
 import Admin from "./pages/Admin";
 import DrivingSchoolOwner from "./pages/DrivingSchoolOwner";
 import IndependentInstructor from "./pages/IndependentInstructor";
+import SchoolDetails from "./pages/SchoolDetails";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const App = () => (
               <Route path="/admin" element={<Admin />} />
               <Route path="/driving-school-owner" element={<DrivingSchoolOwner />} />
               <Route path="/independent-instructor" element={<IndependentInstructor />} />
+              <Route path="/school/:id" element={<SchoolDetails />} />
             </Routes>
           </div>
         </div>
