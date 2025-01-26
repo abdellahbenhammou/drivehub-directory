@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { LogIn } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import { PostgrestFilterBuilder } from "@supabase/postgrest-js";
 
 const backgroundImages = [
   "/driving-school-1.jpg",
@@ -106,6 +105,20 @@ const Index = () => {
             Compare top-rated driving schools in your area and start your journey to becoming a confident driver.
           </p>
           <SearchBar />
+          
+          {/* School Counter Section */}
+          <div className="mt-8 text-center animate-fade-in">
+            <p className="text-2xl font-semibold text-primary">
+              Join Our Growing Community of{' '}
+              <span className="text-3xl font-bold">
+                {isLoading ? "..." : schools?.length || 0}
+              </span>{' '}
+              Driving Schools!
+            </p>
+            <p className="mt-2 text-gray-600 text-lg">
+              Find your perfect match and start your driving journey today with our trusted partners
+            </p>
+          </div>
         </div>
       </div>
 
