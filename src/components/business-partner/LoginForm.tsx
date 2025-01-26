@@ -80,6 +80,13 @@ export function LoginForm({ open, onOpenChange }: Props) {
   const handleResetPassword = async (values: ResetPasswordFormValues) => {
     try {
       setIsLoading(true);
+      
+      // Validate email format before sending reset request
+      if (!z.string().email().safeParse(values.email).success) {
+        toast.error("Please enter a valid email address");
+        return;
+      }
+
       const { error } = await supabase.auth.resetPasswordForEmail(values.email, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
@@ -122,7 +129,11 @@ export function LoginForm({ open, onOpenChange }: Props) {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input type="email" {...field} />
+                      <Input 
+                        type="email" 
+                        placeholder="Enter your email address"
+                        {...field} 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -154,7 +165,11 @@ export function LoginForm({ open, onOpenChange }: Props) {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input type="email" {...field} />
+                      <Input 
+                        type="email" 
+                        placeholder="Enter your email address"
+                        {...field} 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -168,7 +183,11 @@ export function LoginForm({ open, onOpenChange }: Props) {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input type="password" {...field} />
+                      <Input 
+                        type="password" 
+                        placeholder="Enter your password"
+                        {...field} 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
