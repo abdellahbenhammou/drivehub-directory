@@ -94,7 +94,7 @@ export function RegistrationForm({ open, onOpenChange }: Props) {
           .select()
           .eq("email", values.email)
           .eq("is_verified", false)
-          .single();
+          .maybeSingle();
 
         if (checkError && checkError.code !== "PGRST116") {
           throw checkError;
