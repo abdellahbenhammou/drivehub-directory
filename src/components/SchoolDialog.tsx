@@ -45,27 +45,33 @@ export const SchoolDialog = ({ schoolId, isOpen, onClose }: SchoolDialogProps) =
   const navigateSchool = (direction: 'next' | 'prev') => {
     if (!schools?.length) return;
     
-    let newIndex = direction === 'next' 
+    const newIndex = direction === 'next' 
       ? (currentIndex + 1) % schools.length
       : (currentIndex - 1 + schools.length) % schools.length;
     
     const newSchoolId = schools[newIndex].id;
     const searchParams = new URLSearchParams(window.location.search);
     searchParams.set('school', newSchoolId);
-    window.history.pushState({}, '', `?${searchParams.toString()}`);
-    window.dispatchEvent(new Event('popstate'));
+    const newUrl = `?${searchParams.toString()}`;
+    window.history.pushState({}, '', newUrl);
+    
+    // Create and dispatch a custom event with the new school ID
+    const event = new CustomEvent('schoolChange', { detail: { schoolId: newSchoolId } });
+    window.dispatchEvent(event);
   };
 
   if (!currentSchool) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={() => onClose()}>
-      <DialogOverlay className="bg-black/80">
+      <DialogOverlay className="bg-black/80" />
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <Button
           variant="outline"
           size="icon"
-          className="fixed left-8 top-1/2 -translate-y-1/2 z-50 bg-white/90 hover:bg-white transition-all duration-300 shadow-lg hover:shadow-xl"
+          className="fixed left-8 top-1/2 -translate-y-1/2 z-[100] bg-white/90 hover:bg-white transition-all duration-300 shadow-lg hover:shadow-xl"
           onClick={(e) => {
+            e.preventDefault();
             e.stopPropagation();
             navigateSchool('prev');
           }}
@@ -75,16 +81,16 @@ export const SchoolDialog = ({ schoolId, isOpen, onClose }: SchoolDialogProps) =
         <Button
           variant="outline"
           size="icon"
-          className="fixed right-8 top-1/2 -translate-y-1/2 z-50 bg-white/90 hover:bg-white transition-all duration-300 shadow-lg hover:shadow-xl"
+          className="fixed right-8 top-1/2 -translate-y-1/2 z-[100] bg-white/90 hover:bg-white transition-all duration-300 shadow-lg hover:shadow-xl"
           onClick={(e) => {
+            e.preventDefault();
             e.stopPropagation();
             navigateSchool('next');
           }}
         >
           <ChevronRight className="h-6 w-6" />
         </Button>
-      </DialogOverlay>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+
         <SchoolHeader
           name={currentSchool.name}
           rating={currentSchool.rating}
