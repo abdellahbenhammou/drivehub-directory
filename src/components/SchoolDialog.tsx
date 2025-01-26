@@ -7,6 +7,7 @@ import { SchoolHeader } from "./school-dialog/SchoolHeader";
 import { SchoolContact } from "./school-dialog/SchoolContact";
 import { SchoolServices } from "./school-dialog/SchoolServices";
 import { InstructorsList } from "./school-dialog/InstructorsList";
+import { useEffect, useState } from "react";
 
 interface SchoolDialogProps {
   schoolId: string | null;
@@ -14,7 +15,13 @@ interface SchoolDialogProps {
   onClose: () => void;
 }
 
-export const SchoolDialog = ({ schoolId, isOpen, onClose }: SchoolDialogProps) => {
+export const SchoolDialog = ({ schoolId: initialSchoolId, isOpen, onClose }: SchoolDialogProps) => {
+  const [currentSchoolId, setCurrentSchoolId] = useState(initialSchoolId);
+
+  useEffect(() => {
+    setCurrentSchoolId(initialSchoolId);
+  }, [initialSchoolId]);
+
   const { data: schools } = useQuery({
     queryKey: ["schools"],
     queryFn: async () => {
@@ -27,20 +34,20 @@ export const SchoolDialog = ({ schoolId, isOpen, onClose }: SchoolDialogProps) =
   });
 
   const { data: instructors } = useQuery({
-    queryKey: ["instructors", schoolId],
+    queryKey: ["instructors", currentSchoolId],
     queryFn: async () => {
-      if (!schoolId) return [];
+      if (!currentSchoolId) return [];
       const { data } = await supabase
         .from("instructors")
         .select("*")
-        .eq("school_id", schoolId);
+        .eq("school_id", currentSchoolId);
       return data || [];
     },
-    enabled: !!schoolId,
+    enabled: !!currentSchoolId,
   });
 
-  const currentSchool = schools?.find(s => s.id === schoolId);
-  const currentIndex = schools?.findIndex(s => s.id === schoolId) ?? -1;
+  const currentSchool = schools?.find(s => s.id === currentSchoolId);
+  const currentIndex = schools?.findIndex(s => s.id === currentSchoolId) ?? -1;
 
   const navigateSchool = (direction: 'next' | 'prev') => {
     if (!schools?.length) return;
@@ -50,14 +57,13 @@ export const SchoolDialog = ({ schoolId, isOpen, onClose }: SchoolDialogProps) =
       : (currentIndex - 1 + schools.length) % schools.length;
     
     const newSchoolId = schools[newIndex].id;
+    setCurrentSchoolId(newSchoolId);
+    
+    // Update URL without triggering a page reload
     const searchParams = new URLSearchParams(window.location.search);
     searchParams.set('school', newSchoolId);
     const newUrl = `?${searchParams.toString()}`;
     window.history.pushState({}, '', newUrl);
-    
-    // Create and dispatch a custom event with the new school ID
-    const event = new CustomEvent('schoolChange', { detail: { schoolId: newSchoolId } });
-    window.dispatchEvent(event);
   };
 
   if (!currentSchool) return null;
