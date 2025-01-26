@@ -15,6 +15,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -68,6 +69,9 @@ export function LoginForm({ open, onOpenChange }: Props) {
       <DialogContent className="sm:max-w-[400px]">
         <DialogHeader>
           <DialogTitle>Sign In to Your Account</DialogTitle>
+          <DialogDescription>
+            Enter your credentials to access your account
+          </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>

@@ -18,6 +18,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -157,6 +158,11 @@ export function RegistrationForm({ open, onOpenChange }: Props) {
               ? "Verify Your Registration"
               : "Business Partner Registration"}
           </DialogTitle>
+          <DialogDescription>
+            {showVerification
+              ? "Enter the verification code sent to your email"
+              : "Fill in your details to register as a business partner"}
+          </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
