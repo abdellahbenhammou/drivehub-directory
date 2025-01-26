@@ -106,16 +106,16 @@ const Index = () => {
           </p>
           <SearchBar />
           
-          {/* School Counter Section */}
-          <div className="mt-8 text-center animate-fade-in">
-            <p className="text-2xl font-semibold text-primary">
+          {/* School Counter Section - Reduced sizes */}
+          <div className="mt-6 text-center animate-fade-in">
+            <p className="text-xl font-semibold text-primary">
               Join Our Growing Community of{' '}
-              <span className="text-3xl font-bold">
+              <span className="text-2xl font-bold">
                 {isLoading ? "..." : schools?.length || 0}
               </span>{' '}
               Driving Schools!
             </p>
-            <p className="mt-2 text-gray-600 text-lg">
+            <p className="mt-1 text-gray-600 text-base">
               Find your perfect match and start your driving journey today with our trusted partners
             </p>
           </div>
