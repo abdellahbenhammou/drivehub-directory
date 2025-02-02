@@ -9,6 +9,21 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      admin_users: {
+        Row: {
+          created_at: string | null
+          email: string
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+        }
+        Relationships: []
+      }
       customers: {
         Row: {
           city: string
@@ -119,6 +134,44 @@ export type Database = {
         }
         Relationships: []
       }
+      school_ownership_requests: {
+        Row: {
+          admin_notes: string | null
+          created_at: string | null
+          id: string
+          school_id: string
+          status: Database["public"]["Enums"]["request_status"] | null
+          updated_at: string | null
+          user_email: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string | null
+          id?: string
+          school_id: string
+          status?: Database["public"]["Enums"]["request_status"] | null
+          updated_at?: string | null
+          user_email: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string | null
+          id?: string
+          school_id?: string
+          status?: Database["public"]["Enums"]["request_status"] | null
+          updated_at?: string | null
+          user_email?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_ownership_requests_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       schools: {
         Row: {
           city: string | null
@@ -205,7 +258,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      request_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
