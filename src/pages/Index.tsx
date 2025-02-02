@@ -5,7 +5,19 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Separator } from "@/components/ui/separator";
 import { Tables } from "@/integrations/supabase/types";
-import { useState } from "react";
+
+type School = Tables<"schools">;
+
+// Define filter types
+interface Filters {
+  location: string | null;
+  price: number;
+  ratings: number[];
+  language: string | null;
+}
+
+// Define query key tuple type
+type SchoolsQuery = ['schools', Filters];
 
 const backgroundImages = [
   "/driving-school-1.jpg",
@@ -14,36 +26,28 @@ const backgroundImages = [
   "/car-lesson.jpg"
 ];
 
-type School = Tables<"schools">;
-
-// Define the query key type explicitly
-type SchoolsQueryKey = readonly ['schools', {
-  location: string | null;
-  price: number;
-  ratings: number[];
-  language: string | null;
-}];
-
 const Index = () => {
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
   const [maxPrice, setMaxPrice] = useState<number>(5000);
   const [selectedRatings, setSelectedRatings] = useState<number[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
 
-  const queryFilters = {
+  // Create stable filters object
+  const filters: Filters = {
     location: selectedLocation,
     price: maxPrice,
     ratings: selectedRatings,
     language: selectedLanguage
-  } as const;
+  };
 
-  const { data: schools = [], isLoading } = useQuery<School[], Error, School[], SchoolsQueryKey>({
-    queryKey: ['schools', queryFilters],
+  // Type-safe query configuration
+  const { data: schools = [], isLoading } = useQuery<School[], Error>({
+    queryKey: ['schools', filters] as SchoolsQuery,
     queryFn: async () => {
       let query = supabase.from("schools").select("*");
 
-      if (selectedLocation) {
-        const [city, district] = selectedLocation.split(" - ");
+      if (filters.location) {
+        const [city, district] = filters.location.split(" - ");
         if (district) {
           query = query.like('location', `%${district}%`);
         } else {
@@ -51,16 +55,16 @@ const Index = () => {
         }
       }
 
-      if (maxPrice < 5000) {
-        query = query.lte('price_per_hour', maxPrice);
+      if (filters.price < 5000) {
+        query = query.lte('price_per_hour', filters.price);
       }
 
-      if (selectedRatings.length > 0) {
-        query = query.in('rating', selectedRatings);
+      if (filters.ratings.length > 0) {
+        query = query.in('rating', filters.ratings);
       }
 
-      if (selectedLanguage) {
-        query = query.eq('language', selectedLanguage);
+      if (filters.language) {
+        query = query.eq('language', filters.language);
       }
 
       const { data, error } = await query;
@@ -69,7 +73,7 @@ const Index = () => {
         throw error;
       }
 
-      return (data || []) as School[];
+      return data || [];
     }
   });
 
