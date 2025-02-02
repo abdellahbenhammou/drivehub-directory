@@ -6,6 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Separator } from "@/components/ui/separator";
 import { Tables } from "@/integrations/supabase/types";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const backgroundImages = [
   "/driving-school-1.jpg",
@@ -17,6 +19,7 @@ const backgroundImages = [
 type School = Tables<"schools">;
 
 const Index = () => {
+  const navigate = useNavigate();
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
   const [maxPrice, setMaxPrice] = useState<number>(5000);
   const [selectedRatings, setSelectedRatings] = useState<number[]>([]);
@@ -85,7 +88,7 @@ const Index = () => {
           </p>
           <SearchBar />
           
-          <div className="mt-6 text-center animate-fade-in">
+          <div className="mt-6 flex flex-col items-center gap-4">
             <p className="text-xl font-semibold text-primary">
               Join Our Growing Community of{' '}
               <span className="text-2xl font-bold">
@@ -93,6 +96,13 @@ const Index = () => {
               </span>{' '}
               Driving Schools!
             </p>
+            <Button 
+              size="lg"
+              onClick={() => navigate('/register')}
+              className="bg-primary hover:bg-primary/90 text-white font-semibold"
+            >
+              Register Now
+            </Button>
             <p className="mt-1 text-gray-600 text-base">
               Find your perfect match and start your driving journey today
             </p>
@@ -138,6 +148,7 @@ const Index = () => {
                 priceHidden={!school.price_per_hour}
                 location={school.location}
                 image={school.image_url}
+                isActive={true}
               />
             ))}
           </div>
