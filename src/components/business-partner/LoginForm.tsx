@@ -27,9 +27,9 @@ const loginFormSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-// Separate schema for reset password with less strict email validation
+// Simple email validation for reset password
 const resetPasswordFormSchema = z.object({
-  email: z.string().min(1, "Email is required").email("Please enter a valid email"),
+  email: z.string().trim().email("Please enter a valid email address"),
 });
 
 type LoginFormValues = z.infer<typeof loginFormSchema>;
@@ -57,6 +57,7 @@ export function LoginForm({ open, onOpenChange }: Props) {
     defaultValues: {
       email: "",
     },
+    mode: "onChange", // Enable real-time validation
   });
 
   const onSubmit = async (values: LoginFormValues) => {
@@ -81,7 +82,7 @@ export function LoginForm({ open, onOpenChange }: Props) {
   const handleResetPassword = async (values: ResetPasswordFormValues) => {
     try {
       setIsLoading(true);
-      console.log("Attempting password reset for email:", values.email); // Debug log
+      console.log("Attempting password reset for email:", values.email);
 
       const { error } = await supabase.auth.resetPasswordForEmail(values.email, {
         redirectTo: `${window.location.origin}/reset-password`,
@@ -92,7 +93,7 @@ export function LoginForm({ open, onOpenChange }: Props) {
       toast.success("Password reset email sent! Please check your inbox.");
       setShowResetPassword(false);
     } catch (error: any) {
-      console.error("Reset password error:", error); // Debug log
+      console.error("Reset password error:", error);
       toast.error(error.message || "An error occurred sending reset email");
     } finally {
       setIsLoading(false);
@@ -127,9 +128,10 @@ export function LoginForm({ open, onOpenChange }: Props) {
                     <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input 
-                        type="email" 
+                        type="email"
                         placeholder="Enter your email address"
-                        {...field} 
+                        autoComplete="email"
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
@@ -163,9 +165,10 @@ export function LoginForm({ open, onOpenChange }: Props) {
                     <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input 
-                        type="email" 
+                        type="email"
                         placeholder="Enter your email address"
-                        {...field} 
+                        autoComplete="email"
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
@@ -181,9 +184,10 @@ export function LoginForm({ open, onOpenChange }: Props) {
                     <FormLabel>Password</FormLabel>
                     <FormControl>
                       <Input 
-                        type="password" 
+                        type="password"
                         placeholder="Enter your password"
-                        {...field} 
+                        autoComplete="current-password"
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
