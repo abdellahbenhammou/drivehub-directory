@@ -9,7 +9,7 @@ import { Tables } from "@/integrations/supabase/types";
 
 type School = Tables<"schools">;
 
-interface FilterState {
+interface Filters {
   location: string | null;
   price: number;
   ratings: number[];
@@ -29,15 +29,15 @@ const Index = () => {
   const [selectedRatings, setSelectedRatings] = useState<number[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
 
-  const filters = {
+  const filters: Filters = {
     location: selectedLocation,
     price: maxPrice,
     ratings: selectedRatings,
     language: selectedLanguage
-  } as const;
+  };
 
   const { data: schools = [], isLoading } = useQuery({
-    queryKey: ["schools", filters] as const,
+    queryKey: ['schools', filters],
     queryFn: async () => {
       let query = supabase.from("schools").select("*");
 
