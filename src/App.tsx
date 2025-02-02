@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { TopNavBar } from "./components/TopNavBar";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import SavedSchools from "./pages/SavedSchools";
@@ -19,8 +20,22 @@ function App() {
           <Route path="/auth" element={<Auth />} />
           <Route path="/saved" element={<SavedSchools />} />
           <Route path="/school/:id" element={<SchoolDetails />} />
-          <Route path="/school-admin" element={<SchoolAdmin />} />
-          <Route path="/admin" element={<Admin />} />
+          <Route 
+            path="/school-admin" 
+            element={
+              <ProtectedRoute>
+                <SchoolAdmin />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin" 
+            element={
+              <ProtectedRoute adminOnly>
+                <Admin />
+              </ProtectedRoute>
+            } 
+          />
         </Routes>
         <Toaster />
       </div>
