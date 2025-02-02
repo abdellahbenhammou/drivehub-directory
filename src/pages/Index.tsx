@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import { SearchBar } from "@/components/SearchBar";
 import { FilterBar } from "@/components/FilterBar";
 import { SchoolCard } from "@/components/SchoolCard";
@@ -8,16 +9,12 @@ import { Tables } from "@/integrations/supabase/types";
 
 type School = Tables<"schools">;
 
-// Define filter types
-interface Filters {
+interface FilterState {
   location: string | null;
   price: number;
   ratings: number[];
   language: string | null;
 }
-
-// Define query key tuple type
-type SchoolsQuery = ['schools', Filters];
 
 const backgroundImages = [
   "/driving-school-1.jpg",
@@ -32,17 +29,15 @@ const Index = () => {
   const [selectedRatings, setSelectedRatings] = useState<number[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
 
-  // Create stable filters object
-  const filters: Filters = {
+  const filters: FilterState = {
     location: selectedLocation,
     price: maxPrice,
     ratings: selectedRatings,
     language: selectedLanguage
   };
 
-  // Type-safe query configuration
-  const { data: schools = [], isLoading } = useQuery<School[], Error>({
-    queryKey: ['schools', filters] as SchoolsQuery,
+  const { data: schools = [], isLoading } = useQuery({
+    queryKey: ['schools', filters] as const,
     queryFn: async () => {
       let query = supabase.from("schools").select("*");
 
@@ -73,7 +68,7 @@ const Index = () => {
         throw error;
       }
 
-      return data || [];
+      return data as School[];
     }
   });
 
