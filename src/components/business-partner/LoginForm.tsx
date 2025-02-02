@@ -2,53 +2,32 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { ResetPasswordForm } from "./ResetPasswordForm";
 
 const loginFormSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
-
-// Separate schema for reset password with clear email validation
-const resetPasswordFormSchema = z.object({
   email: z
     .string()
     .min(1, "Email is required")
     .email("Please enter a valid email address")
     .transform(val => val.trim().toLowerCase()),
+  password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 type LoginFormValues = z.infer<typeof loginFormSchema>;
-type ResetPasswordFormValues = z.infer<typeof resetPasswordFormSchema>;
 
-interface Props {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-export function LoginForm({ open, onOpenChange }: Props) {
+export const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showResetPassword, setShowResetPassword] = useState(false);
 
-  const loginForm = useForm<LoginFormValues>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
     defaultValues: {
       email: "",
@@ -56,163 +35,73 @@ export function LoginForm({ open, onOpenChange }: Props) {
     },
   });
 
-  const resetPasswordForm = useForm<ResetPasswordFormValues>({
-    resolver: zodResolver(resetPasswordFormSchema),
-    defaultValues: {
-      email: "",
-    },
-    mode: "onBlur", // Validate on blur for better UX
-  });
-
   const onSubmit = async (values: LoginFormValues) => {
     try {
       setIsLoading(true);
-      const { error } = await supabase.auth.signInWithPassword({
-        email: values.email,
-        password: values.password,
-      });
+      const { error } = await supabase.auth.signInWithPassword(values);
 
       if (error) throw error;
 
-      toast.success("Successfully signed in!");
-      onOpenChange(false);
+      toast.success("Successfully logged in!");
     } catch (error: any) {
-      toast.error(error.message || "An error occurred during sign in");
+      toast.error(error.message || "An error occurred during login");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleResetPassword = async (values: ResetPasswordFormValues) => {
-    try {
-      setIsLoading(true);
-      const { error } = await supabase.auth.resetPasswordForEmail(values.email, {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });
-
-      if (error) throw error;
-
-      toast.success("Password reset email sent! Please check your inbox.");
-      setShowResetPassword(false);
-    } catch (error: any) {
-      toast.error(error.message || "An error occurred sending reset email");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  if (showResetPassword) {
+    return (
+      <div className="space-y-4">
+        <h2 className="text-2xl font-semibold">Reset Password</h2>
+        <p className="text-muted-foreground">
+          Enter your email address and we'll send you instructions to reset your password.
+        </p>
+        <ResetPasswordForm onCancel={() => setShowResetPassword(false)} />
+      </div>
+    );
+  }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[400px]">
-        <DialogHeader>
-          <DialogTitle>
-            {showResetPassword ? "Reset Password" : "Sign In to Your Account"}
-          </DialogTitle>
-          <DialogDescription>
-            {showResetPassword
-              ? "Enter your email to receive a password reset link"
-              : "Enter your credentials to access your account"}
-          </DialogDescription>
-        </DialogHeader>
-
-        {showResetPassword ? (
-          <Form {...resetPasswordForm}>
-            <form
-              onSubmit={resetPasswordForm.handleSubmit(handleResetPassword)}
-              className="space-y-4"
-            >
-              <FormField
-                control={resetPasswordForm.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="email"
-                        placeholder="Enter your email address"
-                        autoComplete="email"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="space-y-2">
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Sending..." : "Send Reset Link"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="w-full"
-                  onClick={() => setShowResetPassword(false)}
-                >
-                  Back to Sign In
-                </Button>
-              </div>
-            </form>
-          </Form>
-        ) : (
-          <Form {...loginForm}>
-            <form onSubmit={loginForm.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={loginForm.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="email"
-                        placeholder="Enter your email address"
-                        autoComplete="email"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={loginForm.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="password"
-                        placeholder="Enter your password"
-                        autoComplete="current-password"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="space-y-2">
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Signing in..." : "Sign In"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="w-full"
-                  onClick={() => setShowResetPassword(true)}
-                >
-                  Forgot Password?
-                </Button>
-              </div>
-            </form>
-          </Form>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <div className="space-y-2">
+        <Input
+          type="email"
+          placeholder="Email address"
+          {...register("email")}
+          autoComplete="email"
+          disabled={isLoading}
+        />
+        {errors.email && (
+          <p className="text-sm text-destructive">{errors.email.message}</p>
         )}
-      </DialogContent>
-    </Dialog>
+      </div>
+
+      <div className="space-y-2">
+        <Input
+          type="password"
+          placeholder="Password"
+          {...register("password")}
+          autoComplete="current-password"
+          disabled={isLoading}
+        />
+        {errors.password && (
+          <p className="text-sm text-destructive">{errors.password.message}</p>
+        )}
+      </div>
+
+      <Button
+        type="button"
+        variant="link"
+        className="px-0"
+        onClick={() => setShowResetPassword(true)}
+      >
+        Forgot password?
+      </Button>
+
+      <Button type="submit" className="w-full" disabled={isLoading}>
+        {isLoading ? "Signing in..." : "Sign in"}
+      </Button>
+    </form>
   );
-}
+};

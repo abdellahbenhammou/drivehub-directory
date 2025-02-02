@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { LogIn } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import { PostgrestFilterBuilder } from "@supabase/postgrest-js";
+import { Tables } from "@/integrations/supabase/types";
 
 const backgroundImages = [
   "/driving-school-1.jpg",
@@ -17,17 +17,7 @@ const backgroundImages = [
   "/car-lesson.jpg"
 ];
 
-interface School {
-  id: string;
-  name: string;
-  rating: number;
-  reviews: number;
-  price_per_hour: number | null;
-  location: string;
-  image_url: string;
-  is_active: boolean;
-  next_available: string | null;
-}
+type School = Tables<"schools">;
 
 const Index = () => {
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
@@ -36,9 +26,7 @@ const Index = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
 
   const fetchSchools = async () => {
-    let query = supabase
-      .from("schools")
-      .select("*");
+    let query = supabase.from("schools").select();
 
     if (selectedLocation) {
       const [city, district] = selectedLocation.split(" - ");
@@ -75,6 +63,7 @@ const Index = () => {
     queryFn: fetchSchools,
   });
 
+  // ... keep existing code (JSX rendering)
   return (
     <div className="min-h-screen bg-secondary relative">
       {/* Background Slideshow */}
