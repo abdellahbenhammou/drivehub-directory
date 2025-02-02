@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { LogIn } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { PostgrestFilterBuilder } from "@supabase/postgrest-js";
 
 const backgroundImages = [
   "/driving-school-1.jpg",
@@ -34,42 +35,44 @@ const Index = () => {
   const [selectedRatings, setSelectedRatings] = useState<number[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
 
+  const fetchSchools = async () => {
+    let query = supabase
+      .from("schools")
+      .select("*");
+
+    if (selectedLocation) {
+      const [city, district] = selectedLocation.split(" - ");
+      if (district) {
+        query = query.like('location', `%${district}%`);
+      } else {
+        query = query.like('location', `%${city}%`);
+      }
+    }
+
+    if (maxPrice < 5000) {
+      query = query.lte('price_per_hour', maxPrice);
+    }
+
+    if (selectedRatings.length > 0) {
+      query = query.in('rating', selectedRatings);
+    }
+
+    if (selectedLanguage) {
+      query = query.eq('language', selectedLanguage);
+    }
+
+    const { data, error } = await query;
+    
+    if (error) {
+      throw error;
+    }
+
+    return (data || []) as School[];
+  };
+
   const { data: schools, isLoading } = useQuery({
     queryKey: ["schools", selectedLocation, maxPrice, selectedRatings, selectedLanguage],
-    queryFn: async () => {
-      let query = supabase
-        .from("schools")
-        .select("*");
-
-      if (selectedLocation) {
-        const [city, district] = selectedLocation.split(" - ");
-        if (district) {
-          query = query.like('location', `%${district}%`);
-        } else {
-          query = query.like('location', `%${city}%`);
-        }
-      }
-
-      if (maxPrice < 5000) {
-        query = query.lte('price_per_hour', maxPrice);
-      }
-
-      if (selectedRatings.length > 0) {
-        query = query.in('rating', selectedRatings);
-      }
-
-      if (selectedLanguage) {
-        query = query.eq('language', selectedLanguage);
-      }
-
-      const { data, error } = await query;
-      
-      if (error) {
-        throw error;
-      }
-
-      return (data || []) as School[];
-    },
+    queryFn: fetchSchools,
   });
 
   return (
@@ -106,7 +109,7 @@ const Index = () => {
           </p>
           <SearchBar />
           
-          {/* School Counter Section - Reduced sizes */}
+          {/* School Counter Section */}
           <div className="mt-6 text-center animate-fade-in">
             <p className="text-xl font-semibold text-primary">
               Join Our Growing Community of{' '}
