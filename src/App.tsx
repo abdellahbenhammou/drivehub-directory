@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import SavedSchools from "./pages/SavedSchools";
 import SchoolDetails from "./pages/SchoolDetails";
 import SchoolAdmin from "./pages/SchoolAdmin";
+import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
               <Route path="/saved-schools" element={<SavedSchools />} />
               <Route path="/school/:id" element={<SchoolDetails />} />
               <Route path="/schoolAdmin" element={<SchoolAdmin />} />
+              <Route path="/auth" element={<Auth />} />
             </Routes>
           </div>
         </div>
