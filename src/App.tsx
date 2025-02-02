@@ -7,6 +7,7 @@ import { TopNavBar } from "@/components/TopNavBar";
 import Index from "./pages/Index";
 import SavedSchools from "./pages/SavedSchools";
 import SchoolDetails from "./pages/SchoolDetails";
+import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/saved-schools" element={<SavedSchools />} />
               <Route path="/school/:id" element={<SchoolDetails />} />
+              <Route path="/auth" element={<Auth />} />
             </Routes>
           </div>
         </div>
