@@ -131,6 +131,7 @@ export type Database = {
           location: string
           longitude: number | null
           name: string
+          owner_email: string | null
           phone: string | null
           price_per_hour: number | null
           rating: number
@@ -155,6 +156,7 @@ export type Database = {
           location: string
           longitude?: number | null
           name: string
+          owner_email?: string | null
           phone?: string | null
           price_per_hour?: number | null
           rating: number
@@ -179,6 +181,7 @@ export type Database = {
           location?: string
           longitude?: number | null
           name?: string
+          owner_email?: string | null
           phone?: string | null
           price_per_hour?: number | null
           rating?: number
