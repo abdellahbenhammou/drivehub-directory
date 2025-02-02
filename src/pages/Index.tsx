@@ -4,11 +4,8 @@ import { SchoolCard } from "@/components/SchoolCard";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
-import { LogIn } from "lucide-react";
-import { Link } from "react-router-dom";
-import { useState } from "react";
 import { Tables } from "@/integrations/supabase/types";
+import { useState } from "react";
 
 const backgroundImages = [
   "/driving-school-1.jpg",
@@ -63,10 +60,8 @@ const Index = () => {
     queryFn: fetchSchools,
   });
 
-  // ... keep existing code (JSX rendering)
   return (
     <div className="min-h-screen bg-secondary relative">
-      {/* Background Slideshow */}
       <div className="fixed inset-0 -z-10">
         {backgroundImages.map((image, index) => (
           <div
@@ -81,14 +76,6 @@ const Index = () => {
       </div>
 
       <div className="relative h-[40vh] bg-gradient-to-b from-primary/10 to-secondary/95 flex items-center justify-center px-6">
-        <div className="absolute top-4 right-4">
-          <Link to="/business-partner">
-            <Button variant="outline" className="gap-2 text-primary hover:text-primary-foreground">
-              <LogIn className="w-4 h-4" />
-              Business Partner Login
-            </Button>
-          </Link>
-        </div>
         <div className="text-center animate-fade-in-up">
           <h1 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900 drop-shadow-sm">
             Find Your Perfect Driving School
@@ -98,7 +85,6 @@ const Index = () => {
           </p>
           <SearchBar />
           
-          {/* School Counter Section */}
           <div className="mt-6 text-center animate-fade-in">
             <p className="text-xl font-semibold text-primary">
               Join Our Growing Community of{' '}
@@ -108,7 +94,7 @@ const Index = () => {
               Driving Schools!
             </p>
             <p className="mt-1 text-gray-600 text-base">
-              Find your perfect match and start your driving journey today with our trusted partners
+              Find your perfect match and start your driving journey today
             </p>
           </div>
         </div>
@@ -152,8 +138,6 @@ const Index = () => {
                 priceHidden={!school.price_per_hour}
                 location={school.location}
                 image={school.image_url}
-                isActive={school.is_active || false}
-                nextAvailable={school.next_available}
               />
             ))}
           </div>

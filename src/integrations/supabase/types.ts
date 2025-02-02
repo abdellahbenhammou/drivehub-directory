@@ -9,118 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      admin_users: {
-        Row: {
-          created_at: string
-          id: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      business_partner_profiles: {
-        Row: {
-          created_at: string
-          id: string
-          is_verified: boolean | null
-          last_login: string | null
-          school_id: string | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          is_verified?: boolean | null
-          last_login?: string | null
-          school_id?: string | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          is_verified?: boolean | null
-          last_login?: string | null
-          school_id?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "business_partner_profiles_school_id_fkey"
-            columns: ["school_id"]
-            isOneToOne: false
-            referencedRelation: "schools"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      business_partner_requests: {
-        Row: {
-          city: string
-          created_at: string | null
-          email: string
-          first_name: string
-          id: string
-          is_owner: boolean
-          is_verified: boolean | null
-          last_name: string
-          phone: string
-          school_id: string | null
-          updated_at: string | null
-          verification_attempts: number | null
-          verification_code: string
-        }
-        Insert: {
-          city: string
-          created_at?: string | null
-          email: string
-          first_name: string
-          id?: string
-          is_owner: boolean
-          is_verified?: boolean | null
-          last_name: string
-          phone: string
-          school_id?: string | null
-          updated_at?: string | null
-          verification_attempts?: number | null
-          verification_code: string
-        }
-        Update: {
-          city?: string
-          created_at?: string | null
-          email?: string
-          first_name?: string
-          id?: string
-          is_owner?: boolean
-          is_verified?: boolean | null
-          last_name?: string
-          phone?: string
-          school_id?: string | null
-          updated_at?: string | null
-          verification_attempts?: number | null
-          verification_code?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "business_partner_requests_school_id_fkey"
-            columns: ["school_id"]
-            isOneToOne: false
-            referencedRelation: "schools"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       instructors: {
         Row: {
           created_at: string | null
@@ -165,35 +53,6 @@ export type Database = {
           },
         ]
       }
-      saved_schools: {
-        Row: {
-          created_at: string | null
-          id: string
-          school_id: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          school_id: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          school_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "saved_schools_school_id_fkey"
-            columns: ["school_id"]
-            isOneToOne: false
-            referencedRelation: "schools"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       schools: {
         Row: {
           city: string | null
@@ -202,12 +61,10 @@ export type Database = {
           driving_price: number | null
           id: string
           image_url: string
-          is_active: boolean | null
           latitude: number | null
           location: string
           longitude: number | null
           name: string
-          next_available: string | null
           phone: string | null
           price_per_hour: number | null
           rating: number
@@ -228,12 +85,10 @@ export type Database = {
           driving_price?: number | null
           id?: string
           image_url: string
-          is_active?: boolean | null
           latitude?: number | null
           location: string
           longitude?: number | null
           name: string
-          next_available?: string | null
           phone?: string | null
           price_per_hour?: number | null
           rating: number
@@ -254,12 +109,10 @@ export type Database = {
           driving_price?: number | null
           id?: string
           image_url?: string
-          is_active?: boolean | null
           latitude?: number | null
           location?: string
           longitude?: number | null
           name?: string
-          next_available?: string | null
           phone?: string | null
           price_per_hour?: number | null
           rating?: number
@@ -280,16 +133,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      generate_verification_code: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      is_admin: {
-        Args: {
-          user_id: string
-        }
-        Returns: boolean
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never
