@@ -1,8 +1,9 @@
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Home, School } from "lucide-react";
+import { Home, School, LogIn } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
 
 export const TopNavBar = () => {
   const location = useLocation();
@@ -56,6 +57,14 @@ export const TopNavBar = () => {
                 School Admin
               </Link>
             )}
+          </div>
+          <div className="flex items-center">
+            <Link to="/auth">
+              <Button variant="outline" size="sm" className="ml-4">
+                <LogIn className="w-4 h-4 mr-2" />
+                Login
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
