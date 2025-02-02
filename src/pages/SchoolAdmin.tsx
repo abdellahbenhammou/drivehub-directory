@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Tables } from "@/integrations/supabase/types";
 import { AdminGreeting } from "@/components/admin/AdminGreeting";
 import { SchoolInfo } from "@/components/admin/SchoolInfo";
+import { SchoolSearch } from "@/components/admin/SchoolSearch";
 
 export default function SchoolAdmin() {
   const navigate = useNavigate();
@@ -64,15 +65,28 @@ export default function SchoolAdmin() {
     <div className="container mx-auto p-6">
       <AdminGreeting email={userEmail} />
       
-      <h1 className="text-2xl font-bold mb-6">School Administration</h1>
-      
-      {school ? (
-        <SchoolInfo school={school} />
-      ) : (
-        <div>
-          <p>You don't have any school associated with your account.</p>
-        </div>
-      )}
+      <div className="space-y-8">
+        <h1 className="text-2xl font-bold">School Administration</h1>
+        
+        {school ? (
+          <>
+            <div className="mb-8">
+              <h2 className="text-xl font-semibold mb-4">Your School</h2>
+              <SchoolInfo school={school} />
+            </div>
+            
+            <div>
+              <h2 className="text-xl font-semibold mb-4">Search Other Schools</h2>
+              <SchoolSearch />
+            </div>
+          </>
+        ) : (
+          <div>
+            <p>You don't have any school associated with your account.</p>
+            <SchoolSearch />
+          </div>
+        )}
+      </div>
     </div>
   );
 }
