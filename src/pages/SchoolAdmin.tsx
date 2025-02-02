@@ -11,7 +11,7 @@ export default function SchoolAdmin() {
   const { toast } = useToast();
   const [school, setSchool] = useState<Tables<"schools"> | null>(null);
   const [loading, setLoading] = useState(true);
-  const [adminEmail, setAdminEmail] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -26,24 +26,7 @@ export default function SchoolAdmin() {
         return;
       }
 
-      // Check if the user is an admin
-      const { data: adminData } = await supabase
-        .from("admin_users")
-        .select("email")
-        .eq("email", session.user.email)
-        .single();
-
-      if (!adminData) {
-        navigate("/");
-        toast({
-          title: "Access denied",
-          description: "You don't have admin privileges",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      setAdminEmail(session.user.email);
+      setUserEmail(session.user.email);
 
       // Fetch school data for the logged-in owner
       const { data: schools, error } = await supabase
@@ -79,10 +62,10 @@ export default function SchoolAdmin() {
 
   return (
     <div className="container mx-auto p-6">
-      {adminEmail && (
+      {userEmail && (
         <Card className="p-6 mb-6 bg-primary/5">
-          <h2 className="text-xl font-semibold mb-2">Welcome, Admin!</h2>
-          <p className="text-muted-foreground">Logged in as: {adminEmail}</p>
+          <h2 className="text-xl font-semibold mb-2">Welcome, School Admin!</h2>
+          <p className="text-muted-foreground">Logged in as: {userEmail}</p>
         </Card>
       )}
       
