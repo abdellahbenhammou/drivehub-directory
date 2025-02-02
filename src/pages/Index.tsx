@@ -29,15 +29,15 @@ const Index = () => {
   const [selectedRatings, setSelectedRatings] = useState<number[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
 
-  const filters: FilterState = {
+  const filters = {
     location: selectedLocation,
     price: maxPrice,
     ratings: selectedRatings,
     language: selectedLanguage
-  };
+  } as const;
 
   const { data: schools = [], isLoading } = useQuery({
-    queryKey: ['schools', filters] as const,
+    queryKey: ["schools", filters] as const,
     queryFn: async () => {
       let query = supabase.from("schools").select("*");
 
@@ -68,8 +68,8 @@ const Index = () => {
         throw error;
       }
 
-      return data as School[];
-    }
+      return (data || []) as School[];
+    },
   });
 
   return (
