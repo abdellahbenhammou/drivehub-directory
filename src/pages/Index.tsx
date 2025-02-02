@@ -16,14 +16,28 @@ const backgroundImages = [
 
 type School = Tables<"schools">;
 
+type FilterState = {
+  location: string | null;
+  price: number;
+  ratings: number[];
+  language: string | null;
+};
+
 const Index = () => {
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
   const [maxPrice, setMaxPrice] = useState<number>(5000);
   const [selectedRatings, setSelectedRatings] = useState<number[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
 
+  const filters: FilterState = {
+    location: selectedLocation,
+    price: maxPrice,
+    ratings: selectedRatings,
+    language: selectedLanguage
+  };
+
   const { data: schools = [], isLoading } = useQuery({
-    queryKey: ["schools", { location: selectedLocation, price: maxPrice, ratings: selectedRatings, language: selectedLanguage }],
+    queryKey: ['schools', filters],
     queryFn: async () => {
       let query = supabase.from("schools").select("*");
 

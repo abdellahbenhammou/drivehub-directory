@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import TopNavBar from "./components/TopNavBar";
+import { TopNavBar } from "./components/TopNavBar";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import SavedSchools from "./pages/SavedSchools";
