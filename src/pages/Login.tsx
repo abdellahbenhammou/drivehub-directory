@@ -25,9 +25,13 @@ const Login = () => {
         .select("*")
         .eq("email", email)
         .eq("password", password)
-        .single();
+        .maybeSingle();
 
-      if (error || !data) {
+      if (error) {
+        throw error;
+      }
+
+      if (!data) {
         throw new Error("Invalid email or password");
       }
 

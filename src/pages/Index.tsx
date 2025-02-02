@@ -25,42 +25,40 @@ const Index = () => {
   const [selectedRatings, setSelectedRatings] = useState<number[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
 
-  const fetchSchools = async () => {
-    let query = supabase.from("schools").select("*");
-
-    if (selectedLocation) {
-      const [city, district] = selectedLocation.split(" - ");
-      if (district) {
-        query = query.like('location', `%${district}%`);
-      } else {
-        query = query.like('location', `%${city}%`);
-      }
-    }
-
-    if (maxPrice < 5000) {
-      query = query.lte('price_per_hour', maxPrice);
-    }
-
-    if (selectedRatings.length > 0) {
-      query = query.in('rating', selectedRatings);
-    }
-
-    if (selectedLanguage) {
-      query = query.eq('language', selectedLanguage);
-    }
-
-    const { data, error } = await query;
-    
-    if (error) {
-      throw error;
-    }
-
-    return data as School[];
-  };
-
   const { data: schools = [], isLoading } = useQuery({
-    queryKey: ["schools", selectedLocation, maxPrice, selectedRatings, selectedLanguage],
-    queryFn: fetchSchools,
+    queryKey: ["schools", selectedLocation, maxPrice, selectedRatings, selectedLanguage] as const,
+    queryFn: async () => {
+      let query = supabase.from("schools").select("*");
+
+      if (selectedLocation) {
+        const [city, district] = selectedLocation.split(" - ");
+        if (district) {
+          query = query.like('location', `%${district}%`);
+        } else {
+          query = query.like('location', `%${city}%`);
+        }
+      }
+
+      if (maxPrice < 5000) {
+        query = query.lte('price_per_hour', maxPrice);
+      }
+
+      if (selectedRatings.length > 0) {
+        query = query.in('rating', selectedRatings);
+      }
+
+      if (selectedLanguage) {
+        query = query.eq('language', selectedLanguage);
+      }
+
+      const { data, error } = await query;
+      
+      if (error) {
+        throw error;
+      }
+
+      return (data || []) as School[];
+    }
   });
 
   return (
