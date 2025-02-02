@@ -16,12 +16,13 @@ const backgroundImages = [
 
 type School = Tables<"schools">;
 
-interface QueryFilters {
+// Define the query key type explicitly
+type SchoolsQueryKey = readonly ['schools', {
   location: string | null;
   price: number;
   ratings: number[];
   language: string | null;
-}
+}];
 
 const Index = () => {
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
@@ -29,15 +30,15 @@ const Index = () => {
   const [selectedRatings, setSelectedRatings] = useState<number[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
 
-  const queryFilters: QueryFilters = {
+  const queryFilters = {
     location: selectedLocation,
     price: maxPrice,
     ratings: selectedRatings,
     language: selectedLanguage
-  };
+  } as const;
 
-  const { data: schools = [], isLoading } = useQuery({
-    queryKey: ['schools', queryFilters] as const,
+  const { data: schools = [], isLoading } = useQuery<School[], Error, School[], SchoolsQueryKey>({
+    queryKey: ['schools', queryFilters],
     queryFn: async () => {
       let query = supabase.from("schools").select("*");
 
