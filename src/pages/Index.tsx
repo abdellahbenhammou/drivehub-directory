@@ -6,14 +6,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Separator } from "@/components/ui/separator";
 import { Tables } from "@/integrations/supabase/types";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-import { LogIn, UserPlus } from "lucide-react";
 
 type School = Tables<"schools">;
 
 const Index = () => {
-  const navigate = useNavigate();
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
   const [maxPrice, setMaxPrice] = useState<number>(5000);
   const [selectedRatings, setSelectedRatings] = useState<number[]>([]);
@@ -60,27 +56,6 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-secondary">
       <div className="container mx-auto px-6 py-8">
-        <div className="flex justify-end gap-4 mb-8">
-          <Button
-            variant="outline"
-            onClick={() => navigate("/auth")}
-            className="gap-2"
-          >
-            <LogIn className="w-4 h-4" />
-            Log in
-          </Button>
-          <Button
-            onClick={() => {
-              navigate("/auth");
-              // We'll handle this in the Auth component
-            }}
-            className="gap-2"
-          >
-            <UserPlus className="w-4 h-4" />
-            Register now
-          </Button>
-        </div>
-
         <SearchBar />
         
         <Separator className="my-8" />
