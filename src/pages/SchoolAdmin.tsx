@@ -11,6 +11,7 @@ export default function SchoolAdmin() {
   const { toast } = useToast();
   const [school, setSchool] = useState<Tables<"schools"> | null>(null);
   const [loading, setLoading] = useState(true);
+  const [adminEmail, setAdminEmail] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -24,6 +25,25 @@ export default function SchoolAdmin() {
         });
         return;
       }
+
+      // Check if the user is an admin
+      const { data: adminData } = await supabase
+        .from("admin_users")
+        .select("email")
+        .eq("email", session.user.email)
+        .single();
+
+      if (!adminData) {
+        navigate("/");
+        toast({
+          title: "Access denied",
+          description: "You don't have admin privileges",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setAdminEmail(session.user.email);
 
       // Fetch school data for the logged-in owner
       const { data: schools, error } = await supabase
@@ -57,93 +77,97 @@ export default function SchoolAdmin() {
     );
   }
 
-  if (!school) {
-    return (
-      <div className="container mx-auto p-6">
-        <h1 className="text-2xl font-bold mb-4">No School Found</h1>
-        <p>You don't have any school associated with your account.</p>
-      </div>
-    );
-  }
-
   return (
     <div className="container mx-auto p-6">
+      {adminEmail && (
+        <Card className="p-6 mb-6 bg-primary/5">
+          <h2 className="text-xl font-semibold mb-2">Welcome, Admin!</h2>
+          <p className="text-muted-foreground">Logged in as: {adminEmail}</p>
+        </Card>
+      )}
+      
       <h1 className="text-2xl font-bold mb-6">School Administration</h1>
       
-      <Card className="p-6">
-        <div className="space-y-4">
-          <div>
-            <h2 className="text-xl font-semibold">{school.name}</h2>
-            <p className="text-muted-foreground">{school.location}</p>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
+      {school ? (
+        <Card className="p-6">
+          <div className="space-y-4">
             <div>
-              <p className="font-medium">Rating</p>
-              <p>{school.rating} ⭐ ({school.reviews} reviews)</p>
+              <h2 className="text-xl font-semibold">{school.name}</h2>
+              <p className="text-muted-foreground">{school.location}</p>
             </div>
-            <div>
-              <p className="font-medium">Price per Hour</p>
-              <p>{school.price_per_hour ? `$${school.price_per_hour}` : 'Not set'}</p>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="font-medium">Rating</p>
+                <p>{school.rating} ⭐ ({school.reviews} reviews)</p>
+              </div>
+              <div>
+                <p className="font-medium">Price per Hour</p>
+                <p>{school.price_per_hour ? `$${school.price_per_hour}` : 'Not set'}</p>
+              </div>
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <h3 className="font-medium">Services</h3>
-            <div className="grid grid-cols-2 gap-2">
-              {school.theory_classes && (
-                <div>
-                  <p>Theory Classes</p>
-                  <p className="text-sm text-muted-foreground">
-                    ${school.theory_price}
-                  </p>
-                </div>
-              )}
-              {school.driving_classes && (
-                <div>
-                  <p>Driving Classes</p>
-                  <p className="text-sm text-muted-foreground">
-                    ${school.driving_price}
-                  </p>
-                </div>
-              )}
-              {school.safety_courses && (
-                <div>
-                  <p>Safety Courses</p>
-                  <p className="text-sm text-muted-foreground">
-                    ${school.safety_price}
-                  </p>
-                </div>
-              )}
+            <div className="space-y-2">
+              <h3 className="font-medium">Services</h3>
+              <div className="grid grid-cols-2 gap-2">
+                {school.theory_classes && (
+                  <div>
+                    <p>Theory Classes</p>
+                    <p className="text-sm text-muted-foreground">
+                      ${school.theory_price}
+                    </p>
+                  </div>
+                )}
+                {school.driving_classes && (
+                  <div>
+                    <p>Driving Classes</p>
+                    <p className="text-sm text-muted-foreground">
+                      ${school.driving_price}
+                    </p>
+                  </div>
+                )}
+                {school.safety_courses && (
+                  <div>
+                    <p>Safety Courses</p>
+                    <p className="text-sm text-muted-foreground">
+                      ${school.safety_price}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <h3 className="font-medium">Contact Information</h3>
-            <div className="grid grid-cols-2 gap-2">
-              {school.phone && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Phone</p>
-                  <p>{school.phone}</p>
-                </div>
-              )}
-              {school.whatsapp && (
-                <div>
-                  <p className="text-sm text-muted-foreground">WhatsApp</p>
-                  <p>{school.whatsapp}</p>
-                </div>
-              )}
+            <div className="space-y-2">
+              <h3 className="font-medium">Contact Information</h3>
+              <div className="grid grid-cols-2 gap-2">
+                {school.phone && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Phone</p>
+                    <p>{school.phone}</p>
+                  </div>
+                )}
+                {school.whatsapp && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">WhatsApp</p>
+                    <p>{school.whatsapp}</p>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
 
-          <Button 
-            onClick={() => navigate(`/school/${school.id}`)}
-            className="w-full"
-          >
-            View Public Profile
-          </Button>
+            <Button 
+              onClick={() => navigate(`/school/${school.id}`)}
+              className="w-full"
+            >
+              View Public Profile
+            </Button>
+          </div>
+        </Card>
+      ) : (
+        <div>
+          <p>You don't have any school associated with your account.</p>
         </div>
-      </Card>
+      )}
     </div>
   );
 }

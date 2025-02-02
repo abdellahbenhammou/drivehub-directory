@@ -23,7 +23,7 @@ const Index = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
 
   const { data: schools = [], isLoading } = useQuery({
-    queryKey: ["schools", selectedLocation, maxPrice, selectedRatings, selectedLanguage],
+    queryKey: ["schools", { location: selectedLocation, price: maxPrice, ratings: selectedRatings, language: selectedLanguage }],
     queryFn: async () => {
       let query = supabase.from("schools").select("*");
 
