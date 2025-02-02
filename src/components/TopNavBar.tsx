@@ -1,17 +1,23 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Home, School, LogIn } from "lucide-react";
+import { Home, School, LogIn, LogOut } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 export const TopNavBar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [isSchoolOwner, setIsSchoolOwner] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    const checkSchoolOwner = async () => {
+    const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
+      setIsLoggedIn(!!session);
+      
       if (session) {
         const { data: schools } = await supabase
           .from("schools")
@@ -23,8 +29,32 @@ export const TopNavBar = () => {
       }
     };
 
-    checkSchoolOwner();
+    checkAuth();
+
+    // Subscribe to auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      navigate('/');
+      toast({
+        title: "Logged out successfully",
+        description: "You have been signed out of your account",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error logging out",
+        description: "There was a problem signing you out",
+      });
+    }
+  };
 
   return (
     <nav className="bg-white border-b">
@@ -59,12 +89,19 @@ export const TopNavBar = () => {
             )}
           </div>
           <div className="flex items-center">
-            <Link to="/auth">
-              <Button variant="outline" size="sm" className="ml-4">
-                <LogIn className="w-4 h-4 mr-2" />
-                Login
+            {isLoggedIn ? (
+              <Button variant="outline" size="sm" onClick={handleLogout}>
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
               </Button>
-            </Link>
+            ) : (
+              <Link to="/auth">
+                <Button variant="outline" size="sm" className="ml-4">
+                  <LogIn className="w-4 h-4 mr-2" />
+                  Login
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </div>
