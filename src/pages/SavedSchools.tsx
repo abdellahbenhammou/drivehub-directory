@@ -59,7 +59,8 @@ const SavedSchools = () => {
                 priceHidden={!school.price_per_hour}
                 location={school.location}
                 image={school.image_url}
-                isActive={true}
+                isActive={school.is_active || false}
+                nextAvailable={school.next_available}
               />
             ))}
           </div>
