@@ -84,8 +84,8 @@ export const SchoolCard = ({
       </Card>
       <SchoolDialog 
         schoolId={id || null}
-        isOpen={isDialogOpen} 
-        onClose={() => setIsDialogOpen(false)} 
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
       />
     </>
   );

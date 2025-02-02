@@ -10,31 +10,69 @@ import { supabase } from "@/integrations/supabase/client";
 type School = Tables<"schools">;
 
 interface SchoolDialogProps {
-  school: School;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  schoolId: string | null;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-export const SchoolDialog = ({ school, open, onOpenChange }: SchoolDialogProps) => {
-  const { data: instructors } = useQuery({
-    queryKey: ["instructors", school.id],
+export const SchoolDialog = ({ schoolId, isOpen, onClose }: SchoolDialogProps) => {
+  const { data: school } = useQuery({
+    queryKey: ["school", schoolId],
     queryFn: async () => {
+      if (!schoolId) return null;
       const { data, error } = await supabase
-        .from("instructors")
+        .from("schools")
         .select("*")
-        .eq("school_id", school.id);
+        .eq("id", schoolId)
+        .single();
 
       if (error) throw error;
       return data;
     },
+    enabled: !!schoolId,
   });
 
+  const { data: instructors } = useQuery({
+    queryKey: ["instructors", schoolId],
+    queryFn: async () => {
+      if (!schoolId) return [];
+      const { data, error } = await supabase
+        .from("instructors")
+        .select("*")
+        .eq("school_id", schoolId);
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!schoolId,
+  });
+
+  if (!school) return null;
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <SchoolHeader school={school} />
-        <SchoolServices school={school} />
-        <SchoolContact school={school} />
+        <SchoolHeader 
+          name={school.name}
+          rating={school.rating}
+          reviews={school.reviews}
+          schoolId={school.id}
+        />
+        <SchoolServices 
+          theoryClasses={school.theory_classes}
+          theoryPrice={school.theory_price}
+          drivingClasses={school.driving_classes}
+          drivingPrice={school.driving_price}
+          safetyCourses={school.safety_courses}
+          safetyPrice={school.safety_price}
+        />
+        <SchoolContact 
+          street={school.street || ''}
+          city={school.city || ''}
+          zipCode={school.zip_code || ''}
+          phone={school.phone}
+          whatsapp={school.whatsapp}
+        />
         {instructors && <InstructorsList instructors={instructors} />}
       </DialogContent>
     </Dialog>
