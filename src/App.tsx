@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import SavedSchools from "./pages/SavedSchools";
 import SchoolDetails from "./pages/SchoolDetails";
 import Register from "./pages/Register";
+import Login from "./pages/Login";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
               <Route path="/saved-schools" element={<SavedSchools />} />
               <Route path="/school/:id" element={<SchoolDetails />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/login" element={<Login />} />
             </Routes>
           </div>
         </div>
