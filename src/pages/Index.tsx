@@ -26,7 +26,7 @@ const Index = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
 
   const fetchSchools = async () => {
-    let query = supabase.from("schools").select();
+    let query = supabase.from("schools").select("*");
 
     if (selectedLocation) {
       const [city, district] = selectedLocation.split(" - ");
@@ -55,10 +55,10 @@ const Index = () => {
       throw error;
     }
 
-    return (data || []) as School[];
+    return data as School[];
   };
 
-  const { data: schools, isLoading } = useQuery({
+  const { data: schools = [], isLoading } = useQuery({
     queryKey: ["schools", selectedLocation, maxPrice, selectedRatings, selectedLanguage],
     queryFn: fetchSchools,
   });
@@ -103,7 +103,7 @@ const Index = () => {
             <p className="text-xl font-semibold text-primary">
               Join Our Growing Community of{' '}
               <span className="text-2xl font-bold">
-                {isLoading ? "..." : schools?.length || 0}
+                {schools.length}
               </span>{' '}
               Driving Schools!
             </p>
@@ -141,7 +141,7 @@ const Index = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {schools?.map((school) => (
+            {schools.map((school) => (
               <SchoolCard
                 key={school.id}
                 id={school.id}

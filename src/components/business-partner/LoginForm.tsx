@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { ResetPasswordForm } from "./ResetPasswordForm";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 const loginFormSchema = z.object({
   email: z
@@ -19,7 +20,12 @@ const loginFormSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginFormSchema>;
 
-export const LoginForm = () => {
+interface LoginFormProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+export const LoginForm = ({ open, onOpenChange }: LoginFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showResetPassword, setShowResetPassword] = useState(false);
 
@@ -38,11 +44,15 @@ export const LoginForm = () => {
   const onSubmit = async (values: LoginFormValues) => {
     try {
       setIsLoading(true);
-      const { error } = await supabase.auth.signInWithPassword(values);
+      const { error } = await supabase.auth.signInWithPassword({
+        email: values.email,
+        password: values.password,
+      });
 
       if (error) throw error;
 
       toast.success("Successfully logged in!");
+      if (onOpenChange) onOpenChange(false);
     } catch (error: any) {
       toast.error(error.message || "An error occurred during login");
     } finally {
@@ -50,19 +60,7 @@ export const LoginForm = () => {
     }
   };
 
-  if (showResetPassword) {
-    return (
-      <div className="space-y-4">
-        <h2 className="text-2xl font-semibold">Reset Password</h2>
-        <p className="text-muted-foreground">
-          Enter your email address and we'll send you instructions to reset your password.
-        </p>
-        <ResetPasswordForm onCancel={() => setShowResetPassword(false)} />
-      </div>
-    );
-  }
-
-  return (
+  const FormContent = () => (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="space-y-2">
         <Input
@@ -103,5 +101,31 @@ export const LoginForm = () => {
         {isLoading ? "Signing in..." : "Sign in"}
       </Button>
     </form>
+  );
+
+  if (showResetPassword) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent>
+          <div className="space-y-4">
+            <h2 className="text-2xl font-semibold">Reset Password</h2>
+            <p className="text-muted-foreground">
+              Enter your email address and we'll send you instructions to reset your password.
+            </p>
+            <ResetPasswordForm onCancel={() => setShowResetPassword(false)} />
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  return open !== undefined ? (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <FormContent />
+      </DialogContent>
+    </Dialog>
+  ) : (
+    <FormContent />
   );
 };
