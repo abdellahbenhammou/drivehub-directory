@@ -27,9 +27,13 @@ const loginFormSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-// Simple email validation for reset password
+// Separate schema for reset password with clear email validation
 const resetPasswordFormSchema = z.object({
-  email: z.string().trim().email("Please enter a valid email address"),
+  email: z
+    .string()
+    .min(1, "Email is required")
+    .email("Please enter a valid email address")
+    .transform(val => val.trim().toLowerCase()),
 });
 
 type LoginFormValues = z.infer<typeof loginFormSchema>;
@@ -57,7 +61,7 @@ export function LoginForm({ open, onOpenChange }: Props) {
     defaultValues: {
       email: "",
     },
-    mode: "onChange", // Enable real-time validation
+    mode: "onBlur", // Validate on blur for better UX
   });
 
   const onSubmit = async (values: LoginFormValues) => {
@@ -82,8 +86,6 @@ export function LoginForm({ open, onOpenChange }: Props) {
   const handleResetPassword = async (values: ResetPasswordFormValues) => {
     try {
       setIsLoading(true);
-      console.log("Attempting password reset for email:", values.email);
-
       const { error } = await supabase.auth.resetPasswordForEmail(values.email, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
@@ -93,7 +95,6 @@ export function LoginForm({ open, onOpenChange }: Props) {
       toast.success("Password reset email sent! Please check your inbox.");
       setShowResetPassword(false);
     } catch (error: any) {
-      console.error("Reset password error:", error);
       toast.error(error.message || "An error occurred sending reset email");
     } finally {
       setIsLoading(false);
